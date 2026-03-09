@@ -9,7 +9,7 @@ def get_llm(temperature: float = None) -> ChatGoogleGenerativeAI:
         raise ValueError("GEMINI_API_KEY bulunamadı! Lütfen .env dosyanızı kontrol edin.")
         
     pipeline_conf = config.get("pipeline", {})
-    model_name = pipeline_conf.get("llm_model", "gemini-2.5-flash")
+    model_name = pipeline_conf.get("llm_model", "gemini-1.5-flash")
     
     if temperature is None:
         temperature = pipeline_conf.get("llm_temperature", 0.7)
