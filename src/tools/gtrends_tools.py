@@ -1,10 +1,16 @@
-from pytrends.request import TrendReq
+try:
+    from pytrends.request import TrendReq
+    PYTRENDS_AVAILABLE = True
+except ImportError:
+    PYTRENDS_AVAILABLE = False
 from src.utils.logger import get_logger
 
 logger = get_logger("gtrends_tools")
 
 def get_trend_score(keyword: str) -> int:
     """Belirli bir anahtar kelime için Google Trends üzerinden 0-100 arası trend puanı döner."""
+    if not PYTRENDS_AVAILABLE:
+        return 0
     try:
         pytrends = TrendReq(hl='en-US', tz=180)  # Türkiye saati / Genel dil İngilizce
         # Trendleri son 3 ay icerisinde arar
