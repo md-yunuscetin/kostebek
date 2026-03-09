@@ -1,11 +1,14 @@
+import os
 import redis
 import sys
 from src.utils.logger import get_logger
 
 logger = get_logger("startup")
 
-def check_redis_connection(url: str = "redis://localhost:6379") -> bool:
-    """Windows üzerinde Memurai servisinin (Redis) çalışıp çalışmadığını kontrol eder."""
+def check_redis_connection(url: str = None) -> bool:
+    """Windows üzerinde Memurai veya Bulut üzerinde Redis bağlantısını kontrol eder."""
+    if url is None:
+        url = os.getenv("REDIS_URL", "redis://localhost:6379")
     try:
         r = redis.from_url(url)
         r.ping()
