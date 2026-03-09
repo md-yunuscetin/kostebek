@@ -1,6 +1,9 @@
 from langgraph.graph import StateGraph, END
 from langgraph.checkpoint.memory import MemorySaver
-import redis
+try:
+    import redis
+except ImportError:
+    redis = None
 import uuid
 import os
 
