@@ -1,0 +1,71 @@
+C:\Users\Yunus\AppData\Roaming\Python\Python314\site-packages\langchain_core\_api\deprecation.py:25: UserWarning: Core Pydantic V1 functionality isn't compatible with Python 3.14 or greater.
+  from pydantic.v1.fields import FieldInfo as FieldInfoV1
+C:\Users\Yunus\AppData\Roaming\Python\Python314\site-packages\chromadb\utils\embedding_functions\google_embedding_function.py:221: FutureWarning: 
+
+All support for the `google.generativeai` package has ended. It will no longer be receiving 
+updates or bug fixes. Please switch to the `google.genai` package as soon as possible.
+See README for more details:
+
+https://github.com/google-gemini/deprecated-generative-ai-python/blob/main/README.md
+
+  import google.generativeai as genai
+2026-03-09 03:46:34,910 | RUN:22537ddb | root | INFO | \U0001f680 Pipeline ba\u015flat\u0131l\u0131yor...
+2026-03-09 03:46:34,911 | RUN:22537ddb | supervisor | INFO | [SUPERVISOR] LangGraph Supervisor V5 (Otonom) \u0130n\u015fa Ediliyor...
++--------------------- Traceback (most recent call last) ---------------------+
+| C:\Users\Yunus\.gemini\antigravity\scratch\main.py:69 in run                |
+|                                                                             |
+|   66     if verbose:                                                        |
+|   67         logging.getLogger().setLevel(logging.DEBUG)                    |
+|   68                                                                        |
+| > 69     execute_pipeline(dry_run=dry_run, min_score=min_score)             |
+|   70                                                                        |
+|   71                                                                        |
+|   72 @app.command()                                                         |
+|                                                                             |
+| C:\Users\Yunus\.gemini\antigravity\scratch\main.py:36 in execute_pipeline   |
+|                                                                             |
+|   33     if min_score is not None:                                          |
+|   34         config.setdefault("reddit", {}).setdefault("filters", {})["min |
+|   35                                                                        |
+| > 36     supervisor_app = build_supervisor_graph()                          |
+|   37                                                                        |
+|   38     # LangGraph Thread Belle\u011fi ba\u011flam\u0131                                 |
+|   39     thread_config = {"configurable": {"thread_id": current_run_id}}    |
+|                                                                             |
+| C:\Users\Yunus\.gemini\antigravity\scratch\src\graph.py:224 in              |
+| build_supervisor_graph                                                      |
+|                                                                             |
+|   221                                                                       |
+|   222     # --- Checkpointer ile Kal\u0131c\u0131 Haf\u0131za (ShallowRedisSaver) ---      |
+|   223     memory = ShallowRedisSaver.from_conn_string("redis://localhost:63 |
+| > 224     app = builder.compile(checkpointer=memory)                        |
+|   225                                                                       |
+|   226     logger.info("[SUPERVISOR] \u2705 Supervisor Graph haz\u0131r (ShallowRedis |
+|   227     return app                                                        |
+|                                                                             |
+| C:\Users\Yunus\AppData\Roaming\Python\Python314\site-packages\langgraph\gra |
+| ph\state.py:1082 in compile                                                 |
+|                                                                             |
+|   1079         Returns:                                                     |
+|   1080             CompiledStateGraph: The compiled `StateGraph`.           |
+|   1081         """                                                          |
+| > 1082         checkpointer = ensure_valid_checkpointer(checkpointer)       |
+|   1083         serde_allowlist: set[tuple[str, ...]] | None = None          |
+|   1084         if _serde.STRICT_MSGPACK_ENABLED:                            |
+|   1085             schema_types: list[type[Any]] = [                        |
+|                                                                             |
+| C:\Users\Yunus\AppData\Roaming\Python\Python314\site-packages\langgraph\typ |
+| es.py:86 in ensure_valid_checkpointer                                       |
+|                                                                             |
+|    83     if checkpointer not in (None, True, False) and not isinstance(    |
+|    84         checkpointer, BaseCheckpointSaver                             |
+|    85     ):                                                                |
+| >  86         raise TypeError(                                              |
+|    87             "Invalid checkpointer provided. Expected an instance of " |
+|    88             "`BaseCheckpointSaver`, `True`, `False`, or `None`. "     |
+|    89             f"Received {type(checkpointer).__name__!s}. "             |
++-----------------------------------------------------------------------------+
+TypeError: Invalid checkpointer provided. Expected an instance of 
+`BaseCheckpointSaver`, `True`, `False`, or `None`. Received 
+_GeneratorContextManager. Pass a proper saver (e.g., InMemorySaver, 
+AsyncPostgresSaver).

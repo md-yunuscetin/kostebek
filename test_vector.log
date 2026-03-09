@@ -1,0 +1,32 @@
+============================= test session starts =============================
+platform win32 -- Python 3.14.3, pytest-9.0.2, pluggy-1.6.0 -- C:\Python314\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\Yunus\.gemini\antigravity\scratch
+plugins: anyio-4.12.1, langsmith-0.7.14
+collecting ... collected 1 item
+
+tests/test_vector_store.py::test_no_false_positives PASSED
+
+============================== warnings summary ===============================
+..\..\..\AppData\Roaming\Python\Python314\site-packages\chromadb\telemetry\opentelemetry\__init__.py:128
+  C:\Users\Yunus\AppData\Roaming\Python\Python314\site-packages\chromadb\telemetry\opentelemetry\__init__.py:128: DeprecationWarning: 'asyncio.iscoroutinefunction' is deprecated and slated for removal in Python 3.16; use inspect.iscoroutinefunction() instead
+    if asyncio.iscoroutinefunction(f):
+
+..\..\..\AppData\Roaming\Python\Python314\site-packages\chromadb\utils\embedding_functions\google_embedding_function.py:221
+  C:\Users\Yunus\AppData\Roaming\Python\Python314\site-packages\chromadb\utils\embedding_functions\google_embedding_function.py:221: FutureWarning: 
+  
+  All support for the `google.generativeai` package has ended. It will no longer be receiving 
+  updates or bug fixes. Please switch to the `google.genai` package as soon as possible.
+  See README for more details:
+  
+  https://github.com/google-gemini/deprecated-generative-ai-python/blob/main/README.md
+  
+    import google.generativeai as genai
+
+..\..\..\AppData\Roaming\Python\Python314\site-packages\chromadb\utils\embedding_functions\google_embedding_function.py:228
+tests/test_vector_store.py::test_no_false_positives
+  C:\Users\Yunus\AppData\Roaming\Python\Python314\site-packages\chromadb\utils\embedding_functions\google_embedding_function.py:228: DeprecationWarning: Direct api_key configuration will not be persisted. Please use environment variables via api_key_env_var for persistent storage.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================== 1 passed, 4 warnings in 1.98s ========================

@@ -1,0 +1,29 @@
+# --- Core Reddit Miner Exclusions ---
+data/
+logs/
+.env
+__pycache__/
+*.py[cod]
+venv/
+.venv/
+
+# --- Unrelated Scratch Projects (Excluded from Kostebek Repo) ---
+anki_generator/
+saas-landing-page/
+tus-study-tracker/
+github-search-engine/
+*.ps1
+*.jsonl
+*.csv
+
+# --- Agent/IDE ---
+.agent/
+.agents/
+.gemini/
+.pytest_cache/
+pyrightconfig.json
+.pyre_configuration
+*.txt
+!requirements.txt
+!README.md
+!CLOUD_DEPLOY.md

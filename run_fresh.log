@@ -1,0 +1,237 @@
+C:\Users\Yunus\AppData\Roaming\Python\Python314\site-packages\langchain_core\_api\deprecation.py:25: UserWarning: Core Pydantic V1 functionality isn't compatible with Python 3.14 or greater.
+  from pydantic.v1.fields import FieldInfo as FieldInfoV1
+C:\Users\Yunus\AppData\Roaming\Python\Python314\site-packages\chromadb\utils\embedding_functions\google_embedding_function.py:221: FutureWarning: 
+
+All support for the `google.generativeai` package has ended. It will no longer be receiving 
+updates or bug fixes. Please switch to the `google.genai` package as soon as possible.
+See README for more details:
+
+https://github.com/google-gemini/deprecated-generative-ai-python/blob/main/README.md
+
+  import google.generativeai as genai
+2026-03-09 04:34:44,490 | RUN:f3912673 | root | INFO | \U0001f680 Pipeline ba\u015flat\u0131l\u0131yor...
+2026-03-09 04:34:44,490 | RUN:f3912673 | supervisor | INFO | [SUPERVISOR] LangGraph Supervisor V5 (Otonom) \u0130n\u015fa Ediliyor...
+2026-03-09 04:34:44,529 | RUN:f3912673 | supervisor | INFO | [SUPERVISOR] \u2705 Supervisor Graph haz\u0131r (ShallowRedisSaver Aktif)
+2026-03-09 04:34:44,625 | RUN:f3912673 | supervisor | INFO | \U0001f6a6 [SUPERVISOR] Sistem FULL_PIPELINE modunda ba\u015flat\u0131l\u0131yor.
+2026-03-09 04:34:44,626 | RUN:f3912673 | collector | INFO | [AGENT] Collector: Multi-Source Scraper ba\u015flat\u0131l\u0131yor...
+2026-03-09 04:34:44,626 | RUN:f3912673 | collector | INFO | [AGENT] Collector: Reddit ba\u015flat\u0131ld\u0131...
+2026-03-09 04:34:44,627 | RUN:f3912673 | reddit_tools | ERROR | Reddit PRAW kimlik bilgileri (.env) bulunamad\u0131! Lⁿtfen PRAW_CLIENT_ID ve PRAW_CLIENT_SECRET ekleyin.
+2026-03-09 04:34:44,628 | RUN:f3912673 | reddit_tools | ERROR | Reddit PRAW kimlik bilgileri (.env) bulunamad\u0131! Lⁿtfen PRAW_CLIENT_ID ve PRAW_CLIENT_SECRET ekleyin.
+2026-03-09 04:34:44,629 | RUN:f3912673 | reddit_tools | ERROR | Reddit PRAW kimlik bilgileri (.env) bulunamad\u0131! Lⁿtfen PRAW_CLIENT_ID ve PRAW_CLIENT_SECRET ekleyin.
+2026-03-09 04:34:44,629 | RUN:f3912673 | reddit_tools | ERROR | Reddit PRAW kimlik bilgileri (.env) bulunamad\u0131! Lⁿtfen PRAW_CLIENT_ID ve PRAW_CLIENT_SECRET ekleyin.
+2026-03-09 04:34:44,630 | RUN:f3912673 | reddit_tools | ERROR | Reddit PRAW kimlik bilgileri (.env) bulunamad\u0131! Lⁿtfen PRAW_CLIENT_ID ve PRAW_CLIENT_SECRET ekleyin.
+2026-03-09 04:34:44,631 | RUN:f3912673 | reddit_tools | ERROR | Reddit PRAW kimlik bilgileri (.env) bulunamad\u0131! Lⁿtfen PRAW_CLIENT_ID ve PRAW_CLIENT_SECRET ekleyin.
+2026-03-09 04:34:44,632 | RUN:f3912673 | reddit_tools | ERROR | Reddit PRAW kimlik bilgileri (.env) bulunamad\u0131! Lⁿtfen PRAW_CLIENT_ID ve PRAW_CLIENT_SECRET ekleyin.
+2026-03-09 04:34:44,632 | RUN:f3912673 | collector | INFO |   \u2705 Reddit: 0 kay\u0131t
+2026-03-09 04:34:44,632 | RUN:f3912673 | collector | INFO | [AGENT] Collector: HackerNews ba\u015flat\u0131ld\u0131...
+2026-03-09 04:34:45,583 | RUN:f3912673 | hackernews_tools | INFO | HN Aramas\u0131 tamamland\u0131, 20 hit bulundu.
+2026-03-09 04:34:45,586 | RUN:f3912673 | collector | INFO |   \u2705 HackerNews: 20 kay\u0131t
+2026-03-09 04:34:45,587 | RUN:f3912673 | collector | INFO | [AGENT] Collector: ProductHunt ba\u015flat\u0131ld\u0131...
+2026-03-09 04:34:45,588 | RUN:f3912673 | producthunt_tools | WARNING | PH_API_TOKEN tan\u0131mlanmam\u0131\u015f, Product Hunt atlan\u0131yor.
+2026-03-09 04:34:45,588 | RUN:f3912673 | collector | INFO |   \u2705 ProductHunt: 0 kay\u0131t
+2026-03-09 04:34:45,588 | RUN:f3912673 | collector | INFO | [AGENT] Collector: AppStore ba\u015flat\u0131ld\u0131...
+2026-03-09 04:34:45,593 | RUN:f3912673 | appstore_tools | INFO | App Store taran\u0131yor... Hedef Uygulamalar: ['Notion', 'Todoist', 'Calendly']
+2026-03-09 04:34:46,086 | RUN:f3912673 | Base | INFO | Initialised: AppStore('us', 'notion', 1232780281)
+2026-03-09 04:34:46,086 | RUN:f3912673 | Base | INFO | Ready to fetch reviews from: https://apps.apple.com/us/app/notion/id1232780281
+2026-03-09 04:34:46,820 | RUN:f3912673 | Base | ERROR | Something went wrong: Expecting value: line 1 column 1 (char 0)
+2026-03-09 04:34:46,820 | RUN:f3912673 | Base | INFO | [id:1232780281] Fetched 0 reviews (0 fetched in total)
+2026-03-09 04:34:47,314 | RUN:f3912673 | Base | INFO | Initialised: AppStore('us', 'todoist', 572688855)
+2026-03-09 04:34:47,314 | RUN:f3912673 | Base | INFO | Ready to fetch reviews from: https://apps.apple.com/us/app/todoist/id572688855
+2026-03-09 04:34:47,920 | RUN:f3912673 | Base | ERROR | Something went wrong: Expecting value: line 1 column 1 (char 0)
+2026-03-09 04:34:47,920 | RUN:f3912673 | Base | INFO | [id:572688855] Fetched 0 reviews (0 fetched in total)
+2026-03-09 04:34:48,352 | RUN:f3912673 | Base | INFO | Initialised: AppStore('us', 'calendly', 1361335903)
+2026-03-09 04:34:48,352 | RUN:f3912673 | Base | INFO | Ready to fetch reviews from: https://apps.apple.com/us/app/calendly/id1361335903
+2026-03-09 04:34:48,989 | RUN:f3912673 | Base | ERROR | Something went wrong: Expecting value: line 1 column 1 (char 0)
+2026-03-09 04:34:48,990 | RUN:f3912673 | Base | INFO | [id:1361335903] Fetched 0 reviews (0 fetched in total)
+2026-03-09 04:34:48,993 | RUN:f3912673 | collector | INFO |   \u2705 AppStore: 0 kay\u0131t
+2026-03-09 04:34:48,993 | RUN:f3912673 | collector | INFO | [AGENT] Collector: Toplam 20 kay\u0131t topland\u0131 (4 kaynak)
+2026-03-09 04:34:48,995 | RUN:f3912673 | extractor | INFO | [AGENT] Extractor: Yorumlar ve postlardan sanc\u0131l\u0131 problemler (Pain Points) τ\u0131kar\u0131l\u0131yor...
+2026-03-09 04:35:08,040 | RUN:f3912673 | prompt_registry | WARNING | \u26a0\ufe0f PromptRegistry: Redis yok (TimeoutError). Prompt versiyonlama devre d\u0131\u015f\u0131 ù varsay\u0131lan promptlar kullan\u0131lacak.
+2026-03-09 04:35:08,045 | RUN:f3912673 | google_genai.models | INFO | AFC is enabled with max remote calls: 10.
+2026-03-09 04:35:14,364 | RUN:f3912673 | httpx | INFO | HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-03-09 04:35:14,369 | RUN:f3912673 | extractor | INFO | [AGENT] Extractor: 12 benzersiz problem kⁿmesi bulundu.
+2026-03-09 04:35:14,371 | RUN:f3912673 | ideagen | INFO | [AGENT] IdeaGen: Problemlerden (Pain Points) i\u015f fikirleri ⁿretiliyor...
+2026-03-09 04:35:15,029 | RUN:f3912673 | google_genai.models | INFO | AFC is enabled with max remote calls: 10.
+2026-03-09 04:35:24,176 | RUN:f3912673 | httpx | INFO | HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-03-09 04:35:24,181 | RUN:f3912673 | ideagen | INFO | [AGENT] IdeaGen: 12 inovatif i\u015f fikri ⁿretildi.
+2026-03-09 04:35:24,190 | RUN:f3912673 | critic | INFO | [AGENT] Critic: Fikirler rasyonel bir yat\u0131r\u0131mc\u0131 g÷zⁿyle puanlan\u0131yor...
+2026-03-09 04:35:27,356 | RUN:f3912673 | gtrends_tools | WARNING | Google Trends hatas\u0131 (AI Tool): The request failed: Google returned a response with code 429. Puan: 0 varsay\u0131l\u0131yor.
+2026-03-09 04:35:29,531 | RUN:f3912673 | gtrends_tools | WARNING | Google Trends hatas\u0131 (AI Agent): The request failed: Google returned a response with code 429. Puan: 0 varsay\u0131l\u0131yor.
+2026-03-09 04:35:31,820 | RUN:f3912673 | gtrends_tools | WARNING | Google Trends hatas\u0131 (Local AI): The request failed: Google returned a response with code 429. Puan: 0 varsay\u0131l\u0131yor.
+2026-03-09 04:35:33,924 | RUN:f3912673 | gtrends_tools | WARNING | Google Trends hatas\u0131 (AI-Powered Website): The request failed: Google returned a response with code 429. Puan: 0 varsay\u0131l\u0131yor.
+2026-03-09 04:35:36,078 | RUN:f3912673 | gtrends_tools | WARNING | Google Trends hatas\u0131 (EU AI): The request failed: Google returned a response with code 429. Puan: 0 varsay\u0131l\u0131yor.
+2026-03-09 04:35:38,387 | RUN:f3912673 | gtrends_tools | WARNING | Google Trends hatas\u0131 (Affordable SaaS): The request failed: Google returned a response with code 429. Puan: 0 varsay\u0131l\u0131yor.
+2026-03-09 04:35:40,704 | RUN:f3912673 | gtrends_tools | WARNING | Google Trends hatas\u0131 (AI-Powered Life): The request failed: Google returned a response with code 429. Puan: 0 varsay\u0131l\u0131yor.
+2026-03-09 04:35:42,824 | RUN:f3912673 | gtrends_tools | WARNING | Google Trends hatas\u0131 (Scam Victim): The request failed: Google returned a response with code 429. Puan: 0 varsay\u0131l\u0131yor.
+2026-03-09 04:35:45,407 | RUN:f3912673 | gtrends_tools | WARNING | Google Trends hatas\u0131 (AI Music): The request failed: Google returned a response with code 429. Puan: 0 varsay\u0131l\u0131yor.
+2026-03-09 04:35:47,397 | RUN:f3912673 | gtrends_tools | WARNING | Google Trends hatas\u0131 (AI Model): The request failed: Google returned a response with code 429. Puan: 0 varsay\u0131l\u0131yor.
+2026-03-09 04:35:49,311 | RUN:f3912673 | gtrends_tools | WARNING | Google Trends hatas\u0131 (Developer Feedback): The request failed: Google returned a response with code 429. Puan: 0 varsay\u0131l\u0131yor.
+2026-03-09 04:35:51,657 | RUN:f3912673 | gtrends_tools | WARNING | Google Trends hatas\u0131 (AI-Powered Business): The request failed: Google returned a response with code 429. Puan: 0 varsay\u0131l\u0131yor.
+2026-03-09 04:35:51,664 | RUN:f3912673 | google_genai.models | INFO | AFC is enabled with max remote calls: 10.
+2026-03-09 04:36:04,295 | RUN:f3912673 | httpx | INFO | HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-03-09 04:36:04,301 | RUN:f3912673 | critic | INFO | [AGENT] Critic: 12 fikir detayland\u0131r\u0131ld\u0131.
+2026-03-09 04:36:04,306 | RUN:f3912673 | guard | INFO | [AGENT] Guard: Orijinallik kontrolⁿ ve Kopya tespiti yap\u0131l\u0131yor...
+2026-03-09 04:36:09,821 | RUN:f3912673 | google_genai.models | INFO | AFC is enabled with max remote calls: 10.
+2026-03-09 04:36:19,279 | RUN:f3912673 | httpx | INFO | HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-03-09 04:36:19,284 | RUN:f3912673 | guard | WARNING | [AGENT] Guard - Fikir kopyayd\u0131 (Reddedildi): Affordable SaaS Toolkit for Freelancers - Nedeni: This is a direct attempt to bundle common SaaS functionalities (project tracking, invoicing, CRM, design tools) into an 'all-in-one' suite for freelancers. This concept is very similar to existing offerings like Zoho One, Freshworks, or even combinations of tools like Trello + QuickBooks + Canva, targeting a broad market need rather than a unique niche.
+2026-03-09 04:36:19,285 | RUN:f3912673 | guard | INFO | [AGENT] Guard: 11 fikir onaydan geτti.
+2026-03-09 04:36:19,288 | RUN:f3912673 | supervisor | INFO | [SUPERVISOR] Guard onay\u0131 al\u0131nd\u0131 -> ObsidianGate
+2026-03-09 04:36:20,373 | RUN:f3912673 | httpx | INFO | HTTP Request: POST https://api.telegram.org/bot8642049686:AAG9HSnPuNuEG2GaH35gBdam-0YtSlQ2T1A/sendMessage "HTTP/1.1 200 OK"
+2026-03-09 04:36:20,375 | RUN:f3912673 | telegram_gate | INFO | [TELEGRAM] Onay mesaj\u0131 g÷nderildi: 
+\U0001f4cb *Fikir*: EU AI Act Complian...
+2026-03-09 04:36:21,345 | RUN:f3912673 | httpx | INFO | HTTP Request: POST https://api.telegram.org/bot8642049686:AAG9HSnPuNuEG2GaH35gBdam-0YtSlQ2T1A/getMe "HTTP/1.1 200 OK"
+2026-03-09 04:36:21,346 | RUN:f3912673 | apscheduler.scheduler | INFO | Scheduler started
+2026-03-09 04:36:21,346 | RUN:f3912673 | telegram.ext.Application | INFO | Application started
+2026-03-09 04:36:21,469 | RUN:f3912673 | httpx | INFO | HTTP Request: POST https://api.telegram.org/bot8642049686:AAG9HSnPuNuEG2GaH35gBdam-0YtSlQ2T1A/deleteWebhook "HTTP/1.1 200 OK"
+2026-03-09 04:36:21,470 | RUN:f3912673 | telegram_gate | INFO | [TELEGRAM] Cevap bekleniyor (Timeout: 1 saat)...
+2026-03-09 04:36:21,754 | RUN:f3912673 | httpx | INFO | HTTP Request: POST https://api.telegram.org/bot8642049686:AAG9HSnPuNuEG2GaH35gBdam-0YtSlQ2T1A/getUpdates "HTTP/1.1 200 OK"
+2026-03-09 04:36:21,897 | RUN:f3912673 | httpx | INFO | HTTP Request: POST https://api.telegram.org/bot8642049686:AAG9HSnPuNuEG2GaH35gBdam-0YtSlQ2T1A/answerCallbackQuery "HTTP/1.1 400 Bad Request"
+2026-03-09 04:36:21,897 | RUN:f3912673 | telegram.ext.Application | ERROR | No error handlers are registered, logging exception.
+Traceback (most recent call last):
+  File "C:\Users\Yunus\AppData\Roaming\Python\Python314\site-packages\telegram\ext\_application.py", line 1315, in process_update
+    await coroutine
+  File "C:\Users\Yunus\AppData\Roaming\Python\Python314\site-packages\telegram\ext\_handlers\basehandler.py", line 159, in handle_update
+    return await self.callback(update, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Yunus\.gemini\antigravity\scratch\src\utils\telegram_gate.py", line 42, in callback_handler
+    await query.answer() # T\u0131klama sonras\u0131 butondaki yⁿkleniyor d÷nmesini bitir
+    ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Yunus\AppData\Roaming\Python\Python314\site-packages\telegram\_callbackquery.py", line 190, in answer
+    return await self.get_bot().answer_callback_query(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<10 lines>...
+    )
+    ^
+  File "C:\Users\Yunus\AppData\Roaming\Python\Python314\site-packages\telegram\ext\_extbot.py", line 969, in answer_callback_query
+    return await super().answer_callback_query(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<10 lines>...
+    )
+    ^
+  File "C:\Users\Yunus\AppData\Roaming\Python\Python314\site-packages\telegram\_bot.py", line 4440, in answer_callback_query
+    return await self._post(
+           ^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    )
+    ^
+  File "C:\Users\Yunus\AppData\Roaming\Python\Python314\site-packages\telegram\_bot.py", line 703, in _post
+    return await self._do_post(
+           ^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Yunus\AppData\Roaming\Python\Python314\site-packages\telegram\ext\_extbot.py", line 369, in _do_post
+    return await super()._do_post(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Yunus\AppData\Roaming\Python\Python314\site-packages\telegram\_bot.py", line 732, in _do_post
+    result = await request.post(
+             ^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Yunus\AppData\Roaming\Python\Python314\site-packages\telegram\request\_baserequest.py", line 198, in post
+    result = await self._request_wrapper(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    )
+    ^
+  File "C:\Users\Yunus\AppData\Roaming\Python\Python314\site-packages\telegram\request\_baserequest.py", line 375, in _request_wrapper
+    raise exception
+telegram.error.BadRequest: Query is too old and response timeout expired or query id is invalid
+2026-03-09 04:36:22,089 | RUN:f3912673 | httpx | INFO | HTTP Request: POST https://api.telegram.org/bot8642049686:AAG9HSnPuNuEG2GaH35gBdam-0YtSlQ2T1A/answerCallbackQuery "HTTP/1.1 400 Bad Request"
+2026-03-09 04:36:22,090 | RUN:f3912673 | telegram.ext.Application | ERROR | No error handlers are registered, logging exception.
+Traceback (most recent call last):
+  File "C:\Users\Yunus\AppData\Roaming\Python\Python314\site-packages\telegram\ext\_application.py", line 1315, in process_update
+    await coroutine
+  File "C:\Users\Yunus\AppData\Roaming\Python\Python314\site-packages\telegram\ext\_handlers\basehandler.py", line 159, in handle_update
+    return await self.callback(update, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Yunus\.gemini\antigravity\scratch\src\utils\telegram_gate.py", line 42, in callback_handler
+    await query.answer() # T\u0131klama sonras\u0131 butondaki yⁿkleniyor d÷nmesini bitir
+    ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Yunus\AppData\Roaming\Python\Python314\site-packages\telegram\_callbackquery.py", line 190, in answer
+    return await self.get_bot().answer_callback_query(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<10 lines>...
+    )
+    ^
+  File "C:\Users\Yunus\AppData\Roaming\Python\Python314\site-packages\telegram\ext\_extbot.py", line 969, in answer_callback_query
+    return await super().answer_callback_query(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<10 lines>...
+    )
+    ^
+  File "C:\Users\Yunus\AppData\Roaming\Python\Python314\site-packages\telegram\_bot.py", line 4440, in answer_callback_query
+    return await self._post(
+           ^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    )
+    ^
+  File "C:\Users\Yunus\AppData\Roaming\Python\Python314\site-packages\telegram\_bot.py", line 703, in _post
+    return await self._do_post(
+           ^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Yunus\AppData\Roaming\Python\Python314\site-packages\telegram\ext\_extbot.py", line 369, in _do_post
+    return await super()._do_post(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Yunus\AppData\Roaming\Python\Python314\site-packages\telegram\_bot.py", line 732, in _do_post
+    result = await request.post(
+             ^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\Yunus\AppData\Roaming\Python\Python314\site-packages\telegram\request\_baserequest.py", line 198, in post
+    result = await self._request_wrapper(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    )
+    ^
+  File "C:\Users\Yunus\AppData\Roaming\Python\Python314\site-packages\telegram\request\_baserequest.py", line 375, in _request_wrapper
+    raise exception
+telegram.error.BadRequest: Query is too old and response timeout expired or query id is invalid
+2026-03-09 04:36:25,735 | RUN:f3912673 | httpx | INFO | HTTP Request: POST https://api.telegram.org/bot8642049686:AAG9HSnPuNuEG2GaH35gBdam-0YtSlQ2T1A/getUpdates "HTTP/1.1 200 OK"
+2026-03-09 04:36:25,921 | RUN:f3912673 | httpx | INFO | HTTP Request: POST https://api.telegram.org/bot8642049686:AAG9HSnPuNuEG2GaH35gBdam-0YtSlQ2T1A/answerCallbackQuery "HTTP/1.1 200 OK"
+2026-03-09 04:36:25,922 | RUN:f3912673 | telegram_gate | INFO | [TELEGRAM] Kullan\u0131c\u0131 seτimi al\u0131nd\u0131: approve
+2026-03-09 04:36:28,477 | RUN:f3912673 | httpx | INFO | HTTP Request: POST https://api.telegram.org/bot8642049686:AAG9HSnPuNuEG2GaH35gBdam-0YtSlQ2T1A/getUpdates "HTTP/1.1 200 OK"
+2026-03-09 04:36:28,478 | RUN:f3912673 | telegram.ext.Application | INFO | Application is stopping. This might take a moment.
+2026-03-09 04:36:28,479 | RUN:f3912673 | apscheduler.scheduler | INFO | Scheduler has been shut down
+2026-03-09 04:36:28,499 | RUN:f3912673 | telegram.ext.Application | INFO | Application.stop() complete
+2026-03-09 04:36:28,510 | RUN:f3912673 | writer | INFO | [AGENT] Writer: Obsidian Markdown Raporu Yaz\u0131l\u0131yor...
+2026-03-09 04:36:29,513 | RUN:f3912673 | google_genai.models | INFO | AFC is enabled with max remote calls: 10.
+2026-03-09 04:36:57,554 | RUN:f3912673 | httpx | INFO | HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent "HTTP/1.1 200 OK"
+2026-03-09 04:36:57,565 | RUN:f3912673 | ops_tools | INFO | [TOOL] Dosya ba\u015far\u0131yla kaydedildi: C:\Users\Yunus\Desktop\YEREL KASA ANA KLAS╓R\YEREL KASA\\u0130\u015f Fikirleri\2026-03-09 - Toplu \u0130\u015f Fikirleri Raporu V7.md
+2026-03-09 04:36:57,565 | RUN:f3912673 | writer | INFO | [AGENT] Writer Sonucu: Ba\u015far\u0131l\u0131: Dosya C:\Users\Yunus\Desktop\YEREL KASA ANA KLAS╓R\YEREL KASA\\u0130\u015f Fikirleri\2026-03-09 - Toplu \u0130\u015f Fikirleri Raporu V7.md konumuna kaydedildi.
+2026-03-09 04:36:57,930 | RUN:f3912673 | vector_store | INFO | [VECTOR DB] Yeni fikir g÷mⁿldⁿ: AI Tool Value Maximizer (ID: 39e5c065f55a3ebda66e495bed589dbb)
+2026-03-09 04:36:57,930 | RUN:f3912673 | writer | INFO | [AGENT] Writer: AI Tool Value Maximizer... vekt÷r veritaban\u0131na eklendi.
+2026-03-09 04:36:58,681 | RUN:f3912673 | vector_store | INFO | [VECTOR DB] Yeni fikir g÷mⁿldⁿ: AI Agent Workflow Orchestrator (ID: 3897ebbd6f9e6a4389f774f02ecc4670)
+2026-03-09 04:36:58,681 | RUN:f3912673 | writer | INFO | [AGENT] Writer: AI Agent Workflow Orchestrator... vekt÷r veritaban\u0131na eklendi.
+2026-03-09 04:36:59,142 | RUN:f3912673 | vector_store | INFO | [VECTOR DB] Yeni fikir g÷mⁿldⁿ: Local AI Context & Memory Manager (ID: 4e84ddbb59c019d689a4757834c4fb99)
+2026-03-09 04:36:59,142 | RUN:f3912673 | writer | INFO | [AGENT] Writer: Local AI Context & Memory Mana... vekt÷r veritaban\u0131na eklendi.
+2026-03-09 04:36:59,909 | RUN:f3912673 | vector_store | INFO | [VECTOR DB] Yeni fikir g÷mⁿldⁿ: AI-Powered Website Insight Generator (ID: 452a05bda1d305d688c2b538abdee722)
+2026-03-09 04:36:59,909 | RUN:f3912673 | writer | INFO | [AGENT] Writer: AI-Powered Website Insight Gen... vekt÷r veritaban\u0131na eklendi.
+2026-03-09 04:37:00,673 | RUN:f3912673 | vector_store | INFO | [VECTOR DB] Yeni fikir g÷mⁿldⁿ: EU AI Act Compliance Navigator (ID: 26ad6dea98d8ee27e65c35a28f1caab6)
+2026-03-09 04:37:00,673 | RUN:f3912673 | writer | INFO | [AGENT] Writer: EU AI Act Compliance Navigator... vekt÷r veritaban\u0131na eklendi.
+2026-03-09 04:37:01,275 | RUN:f3912673 | vector_store | INFO | [VECTOR DB] Yeni fikir g÷mⁿldⁿ: AI-Powered Life Transition Companion (ID: 634f416d784077880dc0446d40584305)
+2026-03-09 04:37:01,275 | RUN:f3912673 | writer | INFO | [AGENT] Writer: AI-Powered Life Transition Com... vekt÷r veritaban\u0131na eklendi.
+2026-03-09 04:37:01,857 | RUN:f3912673 | vector_store | INFO | [VECTOR DB] Yeni fikir g÷mⁿldⁿ: Scam Victim Support & Recovery Network (ID: e3b8465eecb28f03fe448e55a76d9834)
+2026-03-09 04:37:01,857 | RUN:f3912673 | writer | INFO | [AGENT] Writer: Scam Victim Support & Recovery... vekt÷r veritaban\u0131na eklendi.
+2026-03-09 04:37:02,612 | RUN:f3912673 | vector_store | INFO | [VECTOR DB] Yeni fikir g÷mⁿldⁿ: AI Music Arrangement & Idea Generator (ID: cc5ccaaf39310cd6905101b5cc8d65a4)
+2026-03-09 04:37:02,613 | RUN:f3912673 | writer | INFO | [AGENT] Writer: AI Music Arrangement & Idea Ge... vekt÷r veritaban\u0131na eklendi.
+2026-03-09 04:37:03,231 | RUN:f3912673 | vector_store | INFO | [VECTOR DB] Yeni fikir g÷mⁿldⁿ: AI Model Safety & Control Sandbox (ID: 71e5650066493ff7d439dfc33c4574bc)
+2026-03-09 04:37:03,231 | RUN:f3912673 | writer | INFO | [AGENT] Writer: AI Model Safety & Control Sand... vekt÷r veritaban\u0131na eklendi.
+2026-03-09 04:37:04,028 | RUN:f3912673 | vector_store | INFO | [VECTOR DB] Yeni fikir g÷mⁿldⁿ: Developer Feedback Aggregator & Analyzer (ID: 403352c55380c5bddc32db3c01246d71)
+2026-03-09 04:37:04,029 | RUN:f3912673 | writer | INFO | [AGENT] Writer: Developer Feedback Aggregator ... vekt÷r veritaban\u0131na eklendi.
+2026-03-09 04:37:04,713 | RUN:f3912673 | vector_store | INFO | [VECTOR DB] Yeni fikir g÷mⁿldⁿ: AI-Powered Business Discovery Engine (ID: cb3cab597718ba72e112b993f5481f9d)
+2026-03-09 04:37:04,713 | RUN:f3912673 | writer | INFO | [AGENT] Writer: AI-Powered Business Discovery ... vekt÷r veritaban\u0131na eklendi.
+2026-03-09 04:37:04,724 | RUN:f3912673 | self_improver | INFO | [IMPROVER] Otonom \u0130yile\u015ftirme D÷ngⁿsⁿ Ba\u015flat\u0131l\u0131yor...
+2026-03-09 04:37:04,724 | RUN:f3912673 | self_improver | INFO | [IMPROVER] Son 1 τal\u0131\u015fman\u0131n Ortalama En Yⁿksek Skoru: 38.0
+2026-03-09 04:37:04,727 | RUN:f3912673 | approval_gates | INFO | [GATE] PromptGate: Redis yok, bu gate atlan\u0131yor.
+2026-03-09 04:37:04,732 | RUN:f3912673 | root | INFO | \u2705 Pipeline ba\u015far\u0131yla tamamland\u0131. Thread: f3912673

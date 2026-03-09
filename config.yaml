@@ -1,0 +1,66 @@
+# config.yaml
+reddit:
+  subreddits:
+    - SaaS
+    - startups
+    - Entrepreneur
+    - smallbusiness
+    - Freelance
+    - productivity
+    - medicalschool
+  keywords:
+    - "wish there was"
+    - "app idea"
+    - "pain point"
+    - "need an app"
+    - "struggle with"
+    - "hate how"
+    - "is there an app"
+  filters:
+    min_score: 10
+    min_comments: 5
+    min_upvote_ratio: 0.70
+    posts_per_sub: 50
+
+hackernews:
+  keywords:
+    - "ask hn"
+    - "who wants"
+    - "tool for"
+    - "why isn't there"
+  min_score: 50
+
+producthunt:
+  topics:
+    - "productivity"
+    - "developer-tools"
+    - "ai"
+    - "saas"
+
+appstore:
+  target_apps:
+    - ["Notion", "notion", "1232780281"]
+    - ["Todoist", "todoist", "572688855"]
+    - ["Calendly", "calendly", "1361335903"]
+    - ["Evernote", "evernote", "281796108"]
+
+pipeline:
+  max_guard_retries: 2
+  llm_model: "gemini-2.5-flash"
+  llm_temperature: 0.7
+  rate_limit_sleep: 7  # saniye
+
+obsidian:
+  vault_path: "C:\\Users\\Yunus\\Desktop\\YEREL KASA ANA KLASÖR\\YEREL KASA\\İş Fikirleri"
+  tags:
+    - iş-fikirleri
+    - saas
+    - ai-pipeline
+    - acil-oku
+
+notifications:
+  telegram_enabled: true
+  min_score_threshold: 32
+
+guard:
+  similarity_threshold: 0.97  # 0.85 → 0.97: sadece birebir kopyaları yakala

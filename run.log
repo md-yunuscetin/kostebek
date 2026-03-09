@@ -1,0 +1,229 @@
+C:\Users\Yunus\AppData\Roaming\Python\Python314\site-packages\langchain_core\_api\deprecation.py:25: UserWarning: Core Pydantic V1 functionality isn't compatible with Python 3.14 or greater.
+  from pydantic.v1.fields import FieldInfo as FieldInfoV1
+C:\Users\Yunus\AppData\Roaming\Python\Python314\site-packages\chromadb\utils\embedding_functions\google_embedding_function.py:221: FutureWarning: 
+
+All support for the `google.generativeai` package has ended. It will no longer be receiving 
+updates or bug fixes. Please switch to the `google.genai` package as soon as possible.
+See README for more details:
+
+https://github.com/google-gemini/deprecated-generative-ai-python/blob/main/README.md
+
+  import google.generativeai as genai
+2026-03-09 03:48:23,343 | RUN:39daabab | root | INFO | \U0001f680 Pipeline ba\u015flat\u0131l\u0131yor...
+2026-03-09 03:48:23,343 | RUN:39daabab | supervisor | INFO | [SUPERVISOR] LangGraph Supervisor V5 (Otonom) \u0130n\u015fa Ediliyor...
++--------------------- Traceback (most recent call last) ---------------------+
+| C:\Users\Yunus\AppData\Roaming\Python\Python314\site-packages\redis\connect |
+| ion.py:855 in connect_check_health                                          |
+|                                                                             |
+|    852             return                                                   |
+|    853         try:                                                         |
+|    854             if retry_socket_connect:                                 |
+| >  855                 sock = self.retry.call_with_retry(                   |
+|    856                     lambda: self._connect(), lambda error: self.disc |
+|    857                 )                                                    |
+|    858             else:                                                    |
+|                                                                             |
+| C:\Users\Yunus\AppData\Roaming\Python\Python314\site-packages\redis\retry.p |
+| y:116 in call_with_retry                                                    |
+|                                                                             |
+|   113         failures = 0                                                  |
+|   114         while True:                                                   |
+|   115             try:                                                      |
+| > 116                 return do()                                           |
+|   117             except self._supported_errors as error:                   |
+|   118                 if is_retryable and not is_retryable(error):          |
+|   119                     raise                                             |
+|                                                                             |
+| C:\Users\Yunus\AppData\Roaming\Python\Python314\site-packages\redis\connect |
+| ion.py:856 in <lambda>                                                      |
+|                                                                             |
+|    853         try:                                                         |
+|    854             if retry_socket_connect:                                 |
+|    855                 sock = self.retry.call_with_retry(                   |
+| >  856                     lambda: self._connect(), lambda error: self.disc |
+|    857                 )                                                    |
+|    858             else:                                                    |
+|    859                 sock = self._connect()                               |
+|                                                                             |
+| C:\Users\Yunus\AppData\Roaming\Python\Python314\site-packages\redis\connect |
+| ion.py:1306 in _connect                                                     |
+|                                                                             |
+|   1303                     sock.close()                                     |
+|   1304                                                                      |
+|   1305         if err is not None:                                          |
+| > 1306             raise err                                                |
+|   1307         raise OSError("socket.getaddrinfo returned an empty list")   |
+|   1308                                                                      |
+|   1309     def _host_error(self):                                           |
+|                                                                             |
+| C:\Users\Yunus\AppData\Roaming\Python\Python314\site-packages\redis\connect |
+| ion.py:1290 in _connect                                                     |
+|                                                                             |
+|   1287                 sock.settimeout(self.socket_connect_timeout)         |
+|   1288                                                                      |
+|   1289                 # connect                                            |
+| > 1290                 sock.connect(socket_address)                         |
+|   1291                                                                      |
+|   1292                 # set the socket_timeout now that we're connected    |
+|   1293                 sock.settimeout(self.socket_timeout)                 |
++-----------------------------------------------------------------------------+
+ConnectionRefusedError: [WinError 10061] Hedef makine etkin olarak 
+reddetti\u011finden ba\u011flant\u0131 kurulamad\u0131
+
+During handling of the above exception, another exception occurred:
+
++--------------------- Traceback (most recent call last) ---------------------+
+| C:\Users\Yunus\.gemini\antigravity\scratch\main.py:69 in run                |
+|                                                                             |
+|   66     if verbose:                                                        |
+|   67         logging.getLogger().setLevel(logging.DEBUG)                    |
+|   68                                                                        |
+| > 69     execute_pipeline(dry_run=dry_run, min_score=min_score)             |
+|   70                                                                        |
+|   71                                                                        |
+|   72 @app.command()                                                         |
+|                                                                             |
+| C:\Users\Yunus\.gemini\antigravity\scratch\main.py:36 in execute_pipeline   |
+|                                                                             |
+|   33     if min_score is not None:                                          |
+|   34         config.setdefault("reddit", {}).setdefault("filters", {})["min |
+|   35                                                                        |
+| > 36     supervisor_app = build_supervisor_graph()                          |
+|   37                                                                        |
+|   38     # LangGraph Thread Belle\u011fi ba\u011flam\u0131                                 |
+|   39     thread_config = {"configurable": {"thread_id": current_run_id}}    |
+|                                                                             |
+| C:\Users\Yunus\.gemini\antigravity\scratch\src\graph.py:224 in              |
+| build_supervisor_graph                                                      |
+|                                                                             |
+|   221                                                                       |
+|   222     # --- Checkpointer ile Kal\u0131c\u0131 Haf\u0131za (ShallowRedisSaver) ---      |
+|   223     redis_conn = redis.Redis(host="localhost", port=6379, db=0)       |
+| > 224     memory = ShallowRedisSaver(redis_client=redis_conn)               |
+|   225     app = builder.compile(checkpointer=memory)                        |
+|   226                                                                       |
+|   227     logger.info("[SUPERVISOR] \u2705 Supervisor Graph haz\u0131r (ShallowRedis |
+|                                                                             |
+| C:\Users\Yunus\AppData\Roaming\Python\Python314\site-packages\langgraph\che |
+| ckpoint\redis\shallow.py:68 in __init__                                     |
+|                                                                             |
+|    65         checkpoint_blob_prefix: str = CHECKPOINT_BLOB_PREFIX,         |
+|    66         checkpoint_write_prefix: str = CHECKPOINT_WRITE_PREFIX,       |
+|    67     ) -> None:                                                        |
+| >  68         super().__init__(                                             |
+|    69             redis_url=redis_url,                                      |
+|    70             redis_client=redis_client,                                |
+|    71             connection_args=connection_args,                          |
+|                                                                             |
+| C:\Users\Yunus\AppData\Roaming\Python\Python314\site-packages\langgraph\che |
+| ckpoint\redis\base.py:89 in __init__                                        |
+|                                                                             |
+|    86         self._checkpoint_blob_prefix = checkpoint_blob_prefix         |
+|    87         self._checkpoint_write_prefix = checkpoint_write_prefix       |
+|    88                                                                       |
+| >  89         self.configure_client(                                        |
+|    90             redis_url=redis_url,                                      |
+|    91             redis_client=redis_client,                                |
+|    92             connection_args=connection_args or {},                    |
+|                                                                             |
+| C:\Users\Yunus\AppData\Roaming\Python\Python314\site-packages\langgraph\che |
+| ckpoint\redis\shallow.py:425 in configure_client                            |
+|                                                                             |
+|   422         )                                                             |
+|   423                                                                       |
+|   424         # Set client info for Redis monitoring                        |
+| > 425         self.set_client_info()                                        |
+|   426                                                                       |
+|   427     def create_indexes(self) -> None:                                 |
+|   428         self.checkpoints_index = SearchIndex.from_dict(               |
+|                                                                             |
+| C:\Users\Yunus\AppData\Roaming\Python\Python314\site-packages\langgraph\che |
+| ckpoint\redis\base.py:185 in set_client_info                                |
+|                                                                             |
+|   182                                                                       |
+|   183         try:                                                          |
+|   184             # Try to use client_setinfo command if available          |
+| > 185             self._redis.client_setinfo("LIB-NAME", __full_lib_name__) |
+|   186         except (ResponseError, AttributeError):                       |
+|   187             # Fall back to a simple echo if client_setinfo is not ava |
+|   188             try:                                                      |
+|                                                                             |
+| C:\Users\Yunus\AppData\Roaming\Python\Python314\site-packages\redis\command |
+| s\core.py:718 in client_setinfo                                             |
+|                                                                             |
+|    715         Sets the current connection library name or version          |
+|    716         For mor information see https://redis.io/commands/client-set |
+|    717         """                                                          |
+| >  718         return self.execute_command("CLIENT SETINFO", attr, value, * |
+|    719                                                                      |
+|    720     def client_unblock(                                              |
+|    721         self, client_id: int, error: bool = False, **kwargs          |
+|                                                                             |
+| C:\Users\Yunus\AppData\Roaming\Python\Python314\site-packages\redis\client. |
+| py:657 in execute_command                                                   |
+|                                                                             |
+|    654                                                                      |
+|    655     # COMMAND EXECUTION AND PROTOCOL PARSING                         |
+|    656     def execute_command(self, *args, **options):                     |
+| >  657         return self._execute_command(*args, **options)               |
+|    658                                                                      |
+|    659     def _execute_command(self, *args, **options):                    |
+|    660         """Execute a command and return a parsed response"""         |
+|                                                                             |
+| C:\Users\Yunus\AppData\Roaming\Python\Python314\site-packages\redis\client. |
+| py:663 in _execute_command                                                  |
+|                                                                             |
+|    660         """Execute a command and return a parsed response"""         |
+|    661         pool = self.connection_pool                                  |
+|    662         command_name = args[0]                                       |
+| >  663         conn = self.connection or pool.get_connection()              |
+|    664                                                                      |
+|    665         if self._single_connection_client:                           |
+|    666             self.single_connection_lock.acquire()                    |
+|                                                                             |
+| C:\Users\Yunus\AppData\Roaming\Python\Python314\site-packages\redis\utils.p |
+| y:196 in wrapper                                                            |
+|                                                                             |
+|   193                         arg, func.__name__, reason, version, stacklev |
+|   194                     )                                                 |
+|   195                                                                       |
+| > 196             return func(*args, **kwargs)                              |
+|   197                                                                       |
+|   198         return wrapper                                                |
+|   199                                                                       |
+|                                                                             |
+| C:\Users\Yunus\AppData\Roaming\Python\Python314\site-packages\redis\connect |
+| ion.py:2603 in get_connection                                               |
+|                                                                             |
+|   2600                                                                      |
+|   2601         try:                                                         |
+|   2602             # ensure this connection is connected to Redis           |
+| > 2603             connection.connect()                                     |
+|   2604             # connections that the pool provides should be ready to  |
+|   2605             # a command. if not, the connection was either returned  |
+|   2606             # pool before all data has been read or the socket has b |
+|                                                                             |
+| C:\Users\Yunus\AppData\Roaming\Python\Python314\site-packages\redis\connect |
+| ion.py:846 in connect                                                       |
+|                                                                             |
+|    843                                                                      |
+|    844     def connect(self):                                               |
+|    845         "Connects to the Redis server if not already connected"      |
+| >  846         self.connect_check_health(check_health=True)                 |
+|    847                                                                      |
+|    848     def connect_check_health(                                        |
+|    849         self, check_health: bool = True, retry_socket_connect: bool  |
+|                                                                             |
+| C:\Users\Yunus\AppData\Roaming\Python\Python314\site-packages\redis\connect |
+| ion.py:863 in connect_check_health                                          |
+|                                                                             |
+|    860         except socket.timeout:                                       |
+|    861             raise TimeoutError("Timeout connecting to server")       |
+|    862         except OSError as e:                                         |
+| >  863             raise ConnectionError(self._error_message(e))            |
+|    864                                                                      |
+|    865         self._sock = sock                                            |
+|    866         try:                                                         |
++-----------------------------------------------------------------------------+
+ConnectionError: Error 10061 connecting to localhost:6379. Hedef makine etkin 
+olarak reddetti\u011finden ba\u011flant\u0131 kurulamad\u0131.
