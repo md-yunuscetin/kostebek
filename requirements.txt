@@ -1,5 +1,4 @@
-langgraph-checkpoint-redis>=0.1.0
-langgraph-store-redis>=0.1.0
+langgraph-checkpoint-redis
 redis>=5.0.0
 pyyaml>=6.0
 typer>=0.12.0
