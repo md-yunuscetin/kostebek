@@ -46,7 +46,7 @@ appstore:
 
 pipeline:
   max_guard_retries: 2
-  llm_model: "gemini-1.5-flash"
+  llm_model: "gemini-2.5-flash"
   llm_temperature: 0.7
   rate_limit_sleep: 7  # saniye
 
