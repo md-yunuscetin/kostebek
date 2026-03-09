@@ -16,3 +16,4 @@ google-genai>=0.1.0
 langgraph>=0.0.10
 langchain-core>=0.1.0
 pydantic>=2.0.0
+app-store-scraper>=0.3.5
