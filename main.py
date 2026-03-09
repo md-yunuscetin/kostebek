@@ -22,6 +22,9 @@ os.environ["LANGCHAIN_PROJECT"] = os.getenv("LANGCHAIN_PROJECT", "reddit-miner-v
 # Global Logger Kurulumu
 logger = setup_logger()
 
+VERSION = "V9.1.5-STABLE"
+logger.info(f"📍 System Version: {VERSION}")
+
 def execute_pipeline(dry_run: bool = False, min_score: int = None):
     """Core execution logic (Supervisor workflow)"""
     # Her Run için UUID (Correlation ID)
