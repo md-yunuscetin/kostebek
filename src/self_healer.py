@@ -27,7 +27,7 @@ class SelfHealingOrchestrator:
                 healed=True, 
                 action="switch_model",
                 scope="run_only",
-                details="Rate limit / Quota aşıldı: gemini-1.5-flash modeline geçerek devam et."
+                details="Rate limit / Quota aşıldı: gemini-2.5-flash modeline geçerek devam et."
             )
             
         # 2. Kaynaktan veri çekilememe (Boş dönüş)
