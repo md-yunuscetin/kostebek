@@ -93,9 +93,21 @@ Eğer bir VPS ile uğraşmak istemiyorsanız, Render.com üzerinden ücretsiz bi
    - **Schedule**: `0 5 * * *` (Her sabah 08:00 TR saati)
 4. **Environment Variables**: "Advanced" kısmından `GEMINI_API_KEY`, `TELEGRAM_BOT_TOKEN` vb. tüm `.env` içeriğini ekleyin.
 
+### Seçenek E: GitHub Actions — Tamamen Ücretsiz ✅ (EN İYİ SEÇENEK)
+Herhangi bir sunucu veya hesap açmadan, doğrudan GitHub üzerinden her gün otomatik çalıştırabilirsiniz:
+
+1. **GitHub Secrets Ekle**:
+   - Repo -> **Settings** -> **Secrets and variables** -> **Actions** -> **New repository secret**
+   - Şu 4 anahtarı ekleyin: `GEMINI_API_KEY`, `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`, `LANGCHAIN_API_KEY`.
+2. **Workflow Hazır**: `.github/workflows/daily_run.yml` dosyası zaten yüklendi.
+3. **Manuel Test**:
+   - Repo -> **Actions** sekmesi -> **Daily Reddit Miner** -> **Run workflow**.
+
+Bu yöntemle hiçbir maliyet ödemeden sisteminiz her sabah 08:00'de otomatik çalışır.
+
 ---
 
 ## 5. İzleme ve Loglar
 
-- **Manuel Loglar**: `docker-compose logs -f` veya Render panelindeki "Logs" sekmesinden.
+- **Manuel Loglar**: `docker-compose logs -f`, Render panelindeki "Logs" sekmesi veya **GitHub Actions** sekmesindeki çalışma çıktıları.
 - **LangSmith**: `LANGCHAIN_API_KEY` tanımlanmışsa web üzerinden izlemeye devam edebilirsiniz.
