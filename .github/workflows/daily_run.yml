@@ -25,3 +25,11 @@ jobs:
           TELEGRAM_CHAT_ID:    ${{ secrets.TELEGRAM }}
           LANGCHAIN_API_KEY:   ${{ secrets.LANGCHAIN }}
         run: python main.py run
+
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: daily-report-${{ github.run_number }}
+          path: output/reports/   # Writer'ın kaydettiği klasör
+          retention-days: 7
