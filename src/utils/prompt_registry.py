@@ -106,18 +106,27 @@ def get_registry() -> Optional[PromptRegistry]:
     global _registry_instance, _registry_checked
 
     if _registry_checked:
-        return _registry_instance   # Zaten doğrulandı (veya Redis yok), tekrar ping atma
+        return _registry_instance
 
     _registry_checked = True
+    
+    redis_url = os.getenv("REDIS_URL")
+    
     try:
-        client = redis.Redis(
-            host="localhost",
-            port=6379,
-            socket_connect_timeout=2,
-            socket_timeout=2,
-            decode_responses=True
-        )
-        client.ping()   # ← GERÇEK bağlantı testi
+        if redis_url:
+            client = redis.from_url(redis_url, socket_connect_timeout=2, socket_timeout=2, decode_responses=True)
+            logger.info(f"✅ PromptRegistry: Uzak Redis ({redis_url[:15]}...) üzerinden bağlandı.")
+        else:
+            client = redis.Redis(
+                host="localhost",
+                port=6379,
+                socket_connect_timeout=2,
+                socket_timeout=2,
+                decode_responses=True
+            )
+            logger.info("ℹ️ PromptRegistry: Yerel Redis (localhost) deneniyor.")
+            
+        client.ping()
         _registry_instance = PromptRegistry(client)
         logger.info("✅ PromptRegistry: Redis bağlantısı doğrulandı.")
     except (redis.ConnectionError, redis.TimeoutError, Exception) as e:
