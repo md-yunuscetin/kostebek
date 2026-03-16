@@ -17,7 +17,7 @@ def save_obsidian_note(
     """
     try:
         obsidian_config = config.get("obsidian", {})
-        vault_path = obsidian_config.get("vault_path", r"C:\Users\Yunus\Desktop\İş Fikirleri")
+        vault_path = obsidian_config.get("vault_path", r"C:\Users\Yunus\Desktop\YEREL KASA ANA KLASÖR\YEREL KASA\İş Fikirleri")
         
         os.makedirs(vault_path, exist_ok=True)
         today_str = datetime.now().strftime("%Y-%m-%d")
