@@ -7,6 +7,8 @@ from src.agents.base import get_llm
 from src.tools.ops_tools import save_obsidian_note
 from src.utils.logger import get_logger
 from src.utils.vector_store import vector_store
+from src.telegram_gate import send_telegram_report_document
+
 
 logger = get_logger("writer")
 
