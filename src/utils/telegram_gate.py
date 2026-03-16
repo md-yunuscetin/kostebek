@@ -81,4 +81,34 @@ async def send_telegram_notification(message: str):
         logger.info(f"[TELEGRAM] Bildirim gönderildi: {message[:30]}...")
     except Exception as e:
         logger.error(f"[TELEGRAM] Bildirim gönderilemedi: {e}")
+        from io import BytesIO  # en üstteki import'lara EKLE
+
+...
+
+async def send_telegram_report_document(filename: str, content: str):
+    """
+    Tam raporu Telegram'a .md dosyası olarak yollar.
+    filename: 'kostebek-2026-03-16.md' gibi.
+    content:  Markdown raporunun tam metni.
+    """
+    if not BOT_TOKEN or not CHAT_ID:
+        logger.warning("[TELEGRAM] Token veya Chat ID eksik! Rapor gönderilemedi.")
+        return
+
+    bot = Bot(token=BOT_TOKEN)
+
+    try:
+        data = content.encode("utf-8")
+        f = BytesIO(data)
+        f.name = filename
+
+        await bot.send_document(
+            chat_id=CHAT_ID,
+            document=f,
+            caption="📄 Günlük Köstebek Raporu"
+        )
+        logger.info(f"[TELEGRAM] Rapor dokümanı gönderildi: {filename}")
+    except Exception as e:
+        logger.error(f"[TELEGRAM] Rapor dokümanı gönderilemedi: {e}")
+
 
