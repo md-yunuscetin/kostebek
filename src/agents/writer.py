@@ -64,19 +64,26 @@ KURAL 4: Hiçbir giriş-çıkış cümlesi kurma. SADECE MARKDOWN metnini ver.""
         })
         logger.info(f"[AGENT] Writer Sonucu: {save_msg}")
         
-        # V7: ONAYLANMIŞ FİKİRLERİ VEKTÖR HAFIZAYA GÖM
+           # V7: ONAYLANMIŞ FİKİRLERİ VEKTÖR HAFIZAYA GÖM
         for idea in approved_ideas:
             final_score = 0
-            # Fikre ait critic evaluation score bul
             for ev in evaluations:
                 if ev.idea_id == idea.idea_id:
                     final_score = ev.total_score
                     break
-            # Kalıcı belleğe kaydet
             vector_store.save_idea(idea, final_score)
             logger.info(f"[AGENT] Writer: {idea.title[:30]}... vektör veritabanına eklendi.")
+
+        # ✅ Tam raporu Telegram'a .md dosyası olarak gönder
+        try:
+            today_str = datetime.now().strftime("%Y-%m-%d")
+            filename = f"kostebek-rapor-{today_str}.md"
+            asyncio.run(send_telegram_report_document(filename, result.markdown_content))
+        except Exception as e:
+            logger.error(f"[AGENT] Writer: Telegram'a rapor gönderilemedi: {e}")
         
         return {"final_output": result.markdown_content}
+
         
     except Exception as e:
         logger.error(f"[AGENT] Writer Hatası: {e}")
