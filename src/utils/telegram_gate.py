@@ -1,4 +1,5 @@
 import os
+from io import BytesIO
 import asyncio
 from telegram import Bot, InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import Application, CallbackQueryHandler
