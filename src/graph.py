@@ -19,6 +19,8 @@ from src.approval_gates import obsidian_approval_gate, prompt_registry_approval_
 from src.self_healer import healer_orchestrator
 from src.self_improver import improver_agent
 from src.utils.logger import get_logger
+from src.agents.domain_filter import run_domain_filter_agent, check_domain_filter_route  # 👈 YENİ
+
 
 logger = get_logger("supervisor")
 
@@ -92,7 +94,7 @@ def check_extractor_route(state: AgentState):
     if not pain_points:
         logger.warning("[SUPERVISOR] Extractor geçerli problem (PainPoint) bulamadı -> Sistem erken sonlanıyor (END)")
         return END
-    return "IdeaGen"
+    return "DomainFilter"   # 👈 DEĞİŞTİ
 
 
 def check_supervisor_route(state: AgentState):
@@ -146,6 +148,7 @@ def build_supervisor_graph():
     builder.add_node("Supervisor", run_supervisor_agent)
     builder.add_node("Collector", run_collector_agent)
     builder.add_node("Extractor", run_extractor_agent)
+    builder.add_node("DomainFilter", run_domain_filter_agent)   # 👈 YENİ NODE
     builder.add_node("IdeaGen", run_ideagen_agent)
     builder.add_node("Critic", run_critic_agent)
     builder.add_node("Guard", run_guard_agent)
@@ -184,13 +187,22 @@ def build_supervisor_graph():
 
     # Extractor erken çıkış kontrolü
     builder.add_conditional_edges(
-        "Extractor",
-        check_extractor_route,
-        {
-            "IdeaGen": "IdeaGen",
-            END: END
-        }
-    )
+    "Extractor",
+    check_extractor_route,
+    {
+        "DomainFilter": "DomainFilter",   # 👈 DEĞİŞTİ
+        END: END
+    }
+)
+
+    builder.add_conditional_edges(            # 👈 YENİ BLOK
+    "DomainFilter",
+    check_domain_filter_route,
+    {
+        "IdeaGen": "IdeaGen",
+        "END": END
+    }
+)
 
     builder.add_edge("IdeaGen", "Critic")
     builder.add_edge("Critic", "Guard")
