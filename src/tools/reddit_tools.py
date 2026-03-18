@@ -27,6 +27,10 @@ _MCP_INITIALIZED = False
 _MCP_STDERR_TAIL: List[str] = []
 _TOOLS_CACHE: Optional[List[Dict[str, Any]]] = None
 
+if os.name == "nt":
+    import msvcrt
+    import _winapi
+
 
 def _next_id() -> int:
     global _MCP_ID
@@ -35,8 +39,18 @@ def _next_id() -> int:
 
 
 def _spawn_command() -> List[str]:
-    cmd = shutil.which("cmd.exe") or os.path.join(os.environ.get("SystemRoot", r"C:\Windows"), "System32", "cmd.exe")
-    return [cmd, "/d", "/s", "/c", "npx", "-y", "reddit-mcp-buddy"]
+    if os.name == "nt":
+        cmd = shutil.which("cmd.exe") or os.path.join(
+            os.environ.get("SystemRoot", r"C:\Windows"),
+            "System32",
+            "cmd.exe"
+        )
+        return [cmd, "/d", "/s", "/c", "npx", "-y", "reddit-mcp-buddy"]
+
+    npx = shutil.which("npx")
+    if not npx:
+        raise RuntimeError("npx bulunamadı. Node.js / npm kurulu ve PATH içinde olmalı.")
+    return [npx, "-y", "reddit-mcp-buddy"]
 
 
 def _stderr_drain_worker(proc: subprocess.Popen) -> None:
@@ -93,15 +107,98 @@ def _start_mcp_proc() -> subprocess.Popen:
     return _MCP_PROC
 
 
-def _readline_bytes(stream) -> bytes:
+def _stdout_available(proc: subprocess.Popen) -> int:
+    if not proc.stdout:
+        return 0
+
+    if os.name == "nt":
+        try:
+            handle = msvcrt.get_osfhandle(proc.stdout.fileno())
+            return _winapi.PeekNamedPipe(handle)[0]
+        except Exception:
+            return 0
+
+    try:
+        import select
+        r, _, _ = select.select([proc.stdout], [], [], 0)
+        return 1 if r else 0
+    except Exception:
+        return 0
+
+
+def _stdout_read_some(proc: subprocess.Popen, size: int) -> bytes:
+    if not proc.stdout:
+        return b""
+
+    if os.name == "nt":
+        handle = msvcrt.get_osfhandle(proc.stdout.fileno())
+        try:
+            return _winapi.ReadFile(handle, max(1, size))[0]
+        except Exception:
+            return b""
+
+    try:
+        return proc.stdout.read(size)
+    except Exception:
+        return b""
+
+
+def _readline_bytes(proc: subprocess.Popen, timeout_sec: float) -> bytes:
+    deadline = time.time() + timeout_sec
     buf = bytearray()
-    while True:
-        ch = stream.read(1)
-        if not ch:
+
+    while time.time() < deadline:
+        if proc.poll() is not None:
+            tail = " | ".join(_MCP_STDERR_TAIL[-20:])
+            raise RuntimeError(f"MCP süreci kapandı. exit={proc.returncode} stderr={tail}")
+
+        available = _stdout_available(proc)
+        if available <= 0:
+            time.sleep(0.02)
+            continue
+
+        chunk = _stdout_read_some(proc, 1)
+        if not chunk:
+            time.sleep(0.02)
+            continue
+
+        buf.extend(chunk)
+        if chunk == b"\n":
             return bytes(buf)
-        buf.extend(ch)
-        if ch == b"\n":
-            return bytes(buf)
+
+    tail = " | ".join(_MCP_STDERR_TAIL[-20:])
+    raise TimeoutError(f"MCP satır okuma zaman aşımı. stderr={tail}")
+
+
+def _read_exact(proc: subprocess.Popen, size: int, timeout_sec: float) -> bytes:
+    deadline = time.time() + timeout_sec
+    buf = bytearray()
+
+    while len(buf) < size and time.time() < deadline:
+        if proc.poll() is not None:
+            tail = " | ".join(_MCP_STDERR_TAIL[-20:])
+            raise RuntimeError(f"MCP süreci kapandı. exit={proc.returncode} stderr={tail}")
+
+        available = _stdout_available(proc)
+        if available <= 0:
+            time.sleep(0.02)
+            continue
+
+        need = min(max(1, available), size - len(buf))
+        chunk = _stdout_read_some(proc, need)
+        if not chunk:
+            time.sleep(0.02)
+            continue
+
+        buf.extend(chunk)
+
+    if len(buf) != size:
+        tail = " | ".join(_MCP_STDERR_TAIL[-20:])
+        raise TimeoutError(
+            f"MCP body zaman aşımı. expected={size} got={len(buf)} stderr={tail}"
+        )
+
+    return bytes(buf)
 
 
 def _mcp_send(proc: subprocess.Popen, payload: Dict[str, Any]) -> None:
@@ -109,32 +206,21 @@ def _mcp_send(proc: subprocess.Popen, payload: Dict[str, Any]) -> None:
         raise RuntimeError("MCP stdin kullanılamıyor")
 
     body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
-    header = f"Content-Length: {len(body)}\r\n\r\n".encode("ascii")
+    header = (
+        f"Content-Length: {len(body)}\r\n"
+        f"Content-Type: application/json\r\n"
+        f"\r\n"
+    ).encode("ascii")
+
     proc.stdin.write(header + body)
     proc.stdin.flush()
 
 
 def _mcp_recv(proc: subprocess.Popen, timeout_sec: float = 20.0) -> Dict[str, Any]:
-    if not proc.stdout:
-        raise RuntimeError("MCP stdout kullanılamıyor")
-
-    start = time.time()
     headers: Dict[str, str] = {}
 
     while True:
-        if proc.poll() is not None:
-            tail = " | ".join(_MCP_STDERR_TAIL[-20:])
-            raise RuntimeError(f"MCP süreci erken kapandı. exit={proc.returncode} stderr={tail}")
-
-        if time.time() - start > timeout_sec:
-            tail = " | ".join(_MCP_STDERR_TAIL[-20:])
-            raise TimeoutError(f"MCP yanıt zaman aşımı. stderr={tail}")
-
-        line = _readline_bytes(proc.stdout)
-        if not line:
-            time.sleep(0.05)
-            continue
-
+        line = _readline_bytes(proc, timeout_sec)
         if line in (b"\n", b"\r\n"):
             break
 
@@ -147,9 +233,7 @@ def _mcp_recv(proc: subprocess.Popen, timeout_sec: float = 20.0) -> Dict[str, An
     if content_length <= 0:
         raise RuntimeError(f"Geçersiz MCP header: {headers}")
 
-    body = proc.stdout.read(content_length)
-    if not body or len(body) != content_length:
-        raise RuntimeError("Eksik MCP body okundu")
+    body = _read_exact(proc, content_length, timeout_sec)
 
     try:
         return json.loads(body.decode("utf-8", "replace"))
@@ -178,8 +262,10 @@ def _ensure_initialized() -> subprocess.Popen:
 
     while True:
         msg = _mcp_recv(proc, timeout_sec=30.0)
+
         if msg.get("method", "").startswith("notifications/"):
             continue
+
         if msg.get("id") == init_id:
             if "error" in msg:
                 raise RuntimeError(f"initialize hatası: {msg['error']}")
@@ -358,7 +444,6 @@ def _normalize_post(p: Dict[str, Any], subreddit: str) -> Dict[str, Any]:
         permalink = f"https://reddit.com{permalink}"
 
     final_url = permalink or url or f"https://reddit.com/r/{subreddit}"
-
     comments = p.get("comments", p.get("top_comments", []))
     if not isinstance(comments, list):
         comments = []
