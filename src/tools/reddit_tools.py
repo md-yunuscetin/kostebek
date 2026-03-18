@@ -32,7 +32,7 @@ DEFAULT_KEYWORDS = [
 def _server_command():
     if os.name == "nt":
         cmd = shutil.which("cmd.exe") or os.path.join(
-            os.environ.get("SystemRoot", r"C:\Windows"),
+            os.environ.get("SystemRoot", r"C:\\Windows"),
             "System32",
             "cmd.exe",
         )
@@ -231,35 +231,63 @@ def _try_json(v: Any) -> Any:
 
 
 def _extract_tool_payload(response: Any) -> Any:
-    if not isinstance(response, dict):
-        return response
+    obj = _to_plain(response)
 
-    if "structuredContent" in response:
-        return response["structuredContent"]
+    if obj is None:
+        return None
 
-    result = response.get("result", response)
+    if isinstance(obj, dict) and "result" in obj:
+        obj = obj["result"]
 
-    if isinstance(result, dict):
-        if "structuredContent" in result and result["structuredContent"] is not None:
-            return result["structuredContent"]
+    if isinstance(obj, dict):
+        for key in (
+            "structuredContent",
+            "structured_content",
+            "data",
+            "results",
+            "posts",
+            "items",
+        ):
+            if key in obj and obj[key] is not None:
+                return _try_json(obj[key])
 
-        content = result.get("content")
+        content = obj.get("content")
         if isinstance(content, list):
-            parsed = []
-            for item in content:
-                if isinstance(item, dict) and item.get("type") == "text":
-                    parsed.append(_try_json(item.get("text", "")))
-                else:
-                    parsed.append(item)
-            if len(parsed) == 1:
-                return parsed[0]
-            return parsed
+            blobs = []
 
-    return result
+            for item in content:
+                item = _to_plain(item)
+                if not isinstance(item, dict):
+                    continue
+
+                for key in (
+                    "structuredContent",
+                    "structured_content",
+                    "data",
+                    "json",
+                    "resource",
+                ):
+                    if key in item and item[key] is not None:
+                        blobs.append(_try_json(item[key]))
+
+                if item.get("type") == "text":
+                    txt = item.get("text", "")
+                    blobs.append(_try_json(txt))
+
+            if len(blobs) == 1:
+                return blobs[0]
+            if blobs:
+                return blobs
+
+    return obj
 
 
 def _collect_posts(obj: Any) -> List[Dict[str, Any]]:
     out: List[Dict[str, Any]] = []
+    obj = _to_plain(obj)
+
+    if obj is None:
+        return out
 
     if isinstance(obj, list):
         for item in obj:
@@ -267,14 +295,25 @@ def _collect_posts(obj: Any) -> List[Dict[str, Any]]:
         return out
 
     if isinstance(obj, dict):
-        if any(k in obj for k in ("title", "selftext", "permalink", "num_comments", "score", "url")):
-            out.append(obj)
-            return out
+        looks_like_post = sum(
+            key in obj for key in (
+                "title", "url", "permalink", "score",
+                "num_comments", "selftext", "body"
+            )
+        ) >= 2
 
-        for key in ("posts", "items", "results", "children", "data"):
-            if key in obj:
-                out.extend(_collect_posts(obj[key]))
-        return out
+        if looks_like_post:
+            out.append(obj)
+
+        for key, value in obj.items():
+            if key in (
+                "posts", "items", "results", "data", "children",
+                "hot_posts", "top_posts", "new_posts",
+                "search_results", "discussions"
+            ):
+                out.extend(_collect_posts(value))
+            elif isinstance(value, (list, dict)):
+                out.extend(_collect_posts(value))
 
     return out
 
@@ -359,16 +398,58 @@ def reddit_search_posts(
 
         response = _tool_call("browse_subreddit", args)
         payload = _extract_tool_payload(response)
+
+        logger.info(f"[MCP DEBUG] browse_subreddit payload tipi={type(payload).__name__}")
+        if isinstance(payload, dict):
+            logger.info(f"[MCP DEBUG] browse_subreddit payload keys={list(payload.keys())[:20]}")
+        elif isinstance(payload, list):
+            logger.info(f"[MCP DEBUG] browse_subreddit payload list_len={len(payload)}")
+            if payload and isinstance(payload[0], dict):
+                logger.info(f"[MCP DEBUG] browse_subreddit first_item_keys={list(payload[0].keys())[:20]}")
+
         raw_posts = _collect_posts(payload)
 
+        if not raw_posts:
+            search_tool = _get_tool("search_reddit")
+            if search_tool:
+                query = " OR ".join(keywords[:3]) if keywords else subreddit
+                search_args = _build_args(search_tool, [
+                    (["query", "q", "search_term", "keywords"], query),
+                    (["subreddit", "subreddit_name", "name"], subreddit),
+                    (["limit", "count", "page_size"], limit),
+                    (["sort", "sorting"], "hot"),
+                ])
+
+                search_response = _tool_call("search_reddit", search_args)
+                search_payload = _extract_tool_payload(search_response)
+
+                logger.info(f"[MCP DEBUG] search_reddit payload tipi={type(search_payload).__name__}")
+                if isinstance(search_payload, dict):
+                    logger.info(f"[MCP DEBUG] search_reddit payload keys={list(search_payload.keys())[:20]}")
+                elif isinstance(search_payload, list):
+                    logger.info(f"[MCP DEBUG] search_reddit payload list_len={len(search_payload)}")
+                    if search_payload and isinstance(search_payload[0], dict):
+                        logger.info(f"[MCP DEBUG] search_reddit first_item_keys={list(search_payload[0].keys())[:20]}")
+
+                raw_posts = _collect_posts(search_payload)
+                logger.info(f"[MCP] r/{subreddit} search fallback → {len(raw_posts)} ham post")
+
         logger.info(f"[MCP] r/{subreddit} → {len(raw_posts)} ham post")
+
+        seen = set()
+        normalized_posts: List[Dict[str, Any]] = []
+        for raw in raw_posts:
+            post = _normalize_post(raw, subreddit)
+            uniq = post["id"] or post["url"] or post["title"]
+            if not uniq or uniq in seen:
+                continue
+            seen.add(uniq)
+            normalized_posts.append(post)
 
         filtered_engagement: List[Dict[str, Any]] = []
         filtered_keyword: List[Dict[str, Any]] = []
 
-        for raw in raw_posts:
-            post = _normalize_post(raw, subreddit)
-
+        for post in normalized_posts:
             if post["score"] < min_score:
                 continue
             if post["num_comments"] < min_comments:
@@ -418,6 +499,7 @@ def reddit_search_posts(
 
 def _collect_comments(obj: Any, limit: int) -> List[str]:
     out: List[str] = []
+    obj = _to_plain(obj)
 
     if isinstance(obj, dict):
         for key in ("comments", "top_comments", "data", "items", "results"):
