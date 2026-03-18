@@ -5,6 +5,7 @@ import os
 import shutil
 import subprocess
 import threading
+import time
 from typing import Any, Dict, List, Optional
 
 from src.tools.contracts import ToolResult
@@ -34,12 +35,8 @@ def _next_id() -> int:
 
 
 def _spawn_command() -> List[str]:
-    candidates = ["npx.cmd", "npx"] if os.name == "nt" else ["npx"]
-    for cmd in candidates:
-        path = shutil.which(cmd)
-        if path:
-            return [path, "-y", "reddit-mcp-buddy"]
-    raise RuntimeError("npx bulunamadı. Node.js / npm kurulu ve PATH içinde olmalı.")
+    cmd = shutil.which("cmd.exe") or os.path.join(os.environ.get("SystemRoot", r"C:\Windows"), "System32", "cmd.exe")
+    return [cmd, "/d", "/s", "/c", "npx", "-y", "reddit-mcp-buddy"]
 
 
 def _stderr_drain_worker(proc: subprocess.Popen) -> None:
@@ -56,12 +53,16 @@ def _stderr_drain_worker(proc: subprocess.Popen) -> None:
         if not line:
             break
 
-        text = line.decode("utf-8", "replace").strip()
+        if isinstance(line, bytes):
+            text = line.decode("utf-8", "replace").strip()
+        else:
+            text = str(line).strip()
+
         if text:
             _MCP_STDERR_TAIL.append(text)
             if len(_MCP_STDERR_TAIL) > 200:
                 _MCP_STDERR_TAIL = _MCP_STDERR_TAIL[-200:]
-            logger.debug(f"[MCP STDERR] {text}")
+            logger.warning(f"[MCP STDERR] {text}")
 
 
 def _start_mcp_proc() -> subprocess.Popen:
@@ -113,17 +114,26 @@ def _mcp_send(proc: subprocess.Popen, payload: Dict[str, Any]) -> None:
     proc.stdin.flush()
 
 
-def _mcp_recv(proc: subprocess.Popen) -> Dict[str, Any]:
+def _mcp_recv(proc: subprocess.Popen, timeout_sec: float = 20.0) -> Dict[str, Any]:
     if not proc.stdout:
         raise RuntimeError("MCP stdout kullanılamıyor")
 
+    start = time.time()
     headers: Dict[str, str] = {}
 
     while True:
+        if proc.poll() is not None:
+            tail = " | ".join(_MCP_STDERR_TAIL[-20:])
+            raise RuntimeError(f"MCP süreci erken kapandı. exit={proc.returncode} stderr={tail}")
+
+        if time.time() - start > timeout_sec:
+            tail = " | ".join(_MCP_STDERR_TAIL[-20:])
+            raise TimeoutError(f"MCP yanıt zaman aşımı. stderr={tail}")
+
         line = _readline_bytes(proc.stdout)
         if not line:
-            tail = " | ".join(_MCP_STDERR_TAIL[-10:])
-            raise RuntimeError(f"MCP süreci kapandı. stderr={tail}")
+            time.sleep(0.05)
+            continue
 
         if line in (b"\n", b"\r\n"):
             break
@@ -167,7 +177,7 @@ def _ensure_initialized() -> subprocess.Popen:
     })
 
     while True:
-        msg = _mcp_recv(proc)
+        msg = _mcp_recv(proc, timeout_sec=30.0)
         if msg.get("method", "").startswith("notifications/"):
             continue
         if msg.get("id") == init_id:
@@ -199,7 +209,7 @@ def _mcp_request(method: str, params: Optional[Dict[str, Any]] = None) -> Dict[s
         })
 
         while True:
-            msg = _mcp_recv(proc)
+            msg = _mcp_recv(proc, timeout_sec=30.0)
 
             if msg.get("method", "").startswith("notifications/"):
                 continue
