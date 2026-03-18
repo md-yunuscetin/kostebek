@@ -12,6 +12,48 @@ from src.utils.config_loader import config
 
 logger = get_logger("collector")
 
+DOMAIN_FILTER_KEYWORDS = [
+    # Tıp & Klinik
+    "medical", "clinical", "patient", "hospital", "doctor", "physician",
+    "diagnosis", "treatment", "surgery", "healthcare", "telemedicine",
+    "EHR", "EMR", "health record", "radiology", "pathology", "nursing",
+    "pharmacy", "dentist", "therapy", "tıp", "hasta", "doktor", "klinik",
+    # Sağlık Teknolojisi
+    "healthtech", "digital health", "wearable", "biosensor", "FDA",
+    "mental health", "wellness", "fitness", "nutrition", "drug",
+    "medtech", "biotech", "genomics", "sağlık", "medikal",
+    # Eğitim
+    "education", "learning", "student", "teacher", "school", "university",
+    "curriculum", "edtech", "tutoring", "e-learning", "LMS", "MCAT",
+    "medical school", "residency", "eğitim", "öğrenci", "öğretmen", "TUS",
+]
+
+def _is_domain_relevant(text: str, threshold: int = 1) -> bool:
+    text_lower = text.lower()
+    matches = sum(1 for kw in DOMAIN_FILTER_KEYWORDS if kw.lower() in text_lower)
+    return matches >= threshold
+
+def _filter_items(items: list, source_name: str) -> list:
+    approved = []
+    for item in items:
+        combined_text = " ".join(filter(None, [
+            item.get("title", ""),
+            item.get("text", ""),
+            item.get("description", ""),
+            item.get("tagline", ""),
+            item.get("review", ""),
+        ]))
+        if _is_domain_relevant(combined_text):
+            approved.append(item)
+        else:
+            logger.debug(f"[DOMAIN_FILTER] ❌ {source_name} | Kapsam dışı: {combined_text[:60]}...")
+    
+    logger.info(f"[DOMAIN_FILTER] {source_name}: {len(items)} ham → {len(approved)} geçerli")
+    return approved
+# ──────────────────────────────────────────────
+# EKLENECEK KISIM BİTTİ
+# ──────────────────────────────────────────────
+
 def _scrape_reddit(reddit_config: dict, rate_limit_sleep: int) -> ToolResult:
     subs = reddit_config.get("subreddits", ["SaaS"])
     kws = reddit_config.get("keywords", ["app idea"])
@@ -102,12 +144,13 @@ def run_collector_agent(state: AgentState) -> Dict[str, Any]:
                  })
                  
             # Veri standardizasyonu sağlama
-            for item in result.items:
+            filtered_items = _filter_items(result.items, source_name)  # 👈 YENİ
+            for item in filtered_items:                                  # 👈 DEĞİŞTİ
                 if "source" not in item:
                     item["source"] = source_name
                 new_data.append(item)
                 
-            logger.info(f"  ✅ {source_name}: {len(result.items)} kayıt")
+            logger.info(f"  ✅ {source_name}: {len(result.items)} ham → {len(filtered_items)} geçerli")  # 👈 DEĞİŞTİ
             
         except ImportError as ie:
             logger.warning(f"  ⚠️ {source_name} modülü eksik: {ie} — atlanıyor")

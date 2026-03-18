@@ -1,66 +1,127 @@
-# config.yaml
+# config.yaml — Health & Education Domain Edition
+# Güncelleme: Tüm kaynaklar Tıp / Sağlık / Eğitim alanına kısıtlandı
+
 reddit:
   subreddits:
-    - SaaS
-    - startups
-    - Entrepreneur
-    - smallbusiness
-    - Freelance
-    - productivity
+    # 🏥 Tıp & Klinik
+    - medicine
+    - medical
+    - Residency
     - medicalschool
+    - healthcare
+    - nursing
+    - pharmacy
+    - Dentistry
+    - ems
+    - physicianassistant
+    # 💊 Sağlık Teknolojisi & Mental Sağlık
+    - HealthIT
+    - digitalhealth
+    - mentalhealth
+    - psychology
+    - Psychiatry
+    - nutrition
+    - loseit
+    - Fitness
+    # 📚 Eğitim Teknolojisi
+    - edtech
+    - Teachers
+    - education
+    - GetStudying
+    - MCAT
+    - Noctor
+    - premed
+    - medicaleducation
   keywords:
-    - "wish there was"
-    - "app idea"
-    - "pain point"
-    - "need an app"
-    - "struggle with"
-    - "hate how"
-    - "is there an app"
+    # Tıp & Sağlık pain point'leri
+    - "wish there was a medical"
+    - "doctors need"
+    - "patients struggle"
+    - "hospital problem"
+    - "clinical workflow"
+    - "EHR frustration"
+    - "healthcare app idea"
+    - "medical software"
+    - "hate how hospitals"
+    - "why isn't there a health"
+    - "need a tool for doctors"
+    - "nursing pain point"
+    # Eğitim pain point'leri
+    - "students need"
+    - "teachers wish"
+    - "learning problem"
+    - "education app idea"
+    - "medical school struggle"
+    - "studying pain point"
+    - "hate how schools"
+    - "need an app for studying"
+    - "edtech idea"
   filters:
     min_score: 10
     min_comments: 5
     min_upvote_ratio: 0.70
-    posts_per_sub: 50
+    posts_per_sub: 30  # 50 → 30: odaklanıldı, daha az ama daha kaliteli
 
 hackernews:
   keywords:
-    - "ask hn"
-    - "who wants"
-    - "tool for"
-    - "why isn't there"
+    - "ask hn: health"
+    - "ask hn: medical"
+    - "ask hn: education"
+    - "ask hn: learning"
+    - "healthcare tool"
+    - "medical software"
+    - "edtech tool"
+    - "why isn't there a medical"
+    - "doctors who code"
+    - "clinical decision support"
+    - "patient data"
+    - "learning management"
   min_score: 50
 
 producthunt:
   topics:
-    - "productivity"
-    - "developer-tools"
-    - "ai"
-    - "saas"
+    - "health-and-fitness"    # ESKİ: "productivity" → YENİ
+    - "education"             # ESKİ: "developer-tools" → YENİ
+    - "medical"               # ESKİ: "saas" → YENİ
+    - "mental-health"         # ESKİ: "ai" → YENİ (AI zaten her yerde)
 
 appstore:
   target_apps:
-    - ["Notion", "notion", "1232780281"]
-    - ["Todoist", "todoist", "572688855"]
-    - ["Calendly", "calendly", "1361335903"]
-    - ["Evernote", "evernote", "281796108"]
+    # 🏥 Sağlık & Tıp Uygulamaları
+    - ["WebMD", "webmd", "295260116"]
+    - ["Doktor Takvimi", "zocdoc", "693921917"]
+    - ["Ada Health", "ada", "1211244216"]
+    - ["Medscape", "medscape", "1222815962"]
+    - ["Epocrates", "epocrates", "281935788"]
+    # 📚 Tıp Eğitimi & Öğrenme
+    - ["Anki", "anki", "1278825841"]
+    - ["Amboss", "amboss", "1223748420"]
+    - ["Osmosis", "osmosis", "1057997192"]
+    - ["Complete Anatomy", "complete-anatomy", "1054948424"]
+    # 🧠 Mental Sağlık
+    - ["Headspace", "headspace", "493145008"]
+    - ["Calm", "calm", "571800810"]
+    - ["BetterHelp", "betterhelp", "993518581"]
 
 pipeline:
   max_guard_retries: 2
-  llm_model: "gemini-2.5-flash"
-  llm_temperature: 0.7
-  rate_limit_sleep: 7  # saniye
+  llm_model: "gemini-2.5-flash"    # Değişmedi
+  llm_temperature: 0.7              # Değişmedi
+  rate_limit_sleep: 7               # Değişmedi
 
 obsidian:
   vault_path: "C:\\Users\\Yunus\\Desktop\\YEREL KASA ANA KLASÖR\\YEREL KASA\\İş Fikirleri"
   tags:
     - iş-fikirleri
-    - saas
+    - healthtech          # ESKİ: saas → YENİ
+    - edtech              # YENİ EKLENDİ
     - ai-pipeline
     - acil-oku
+    - tıp-sağlık          # YENİ EKLENDİ
 
 notifications:
   telegram_enabled: true
-  min_score_threshold: 32
+  min_score_threshold: 32  # Değişmedi
 
 guard:
-  similarity_threshold: 0.97  # 0.85 → 0.97: sadece birebir kopyaları yakala
+  similarity_threshold: 0.97  # Değişmedi
