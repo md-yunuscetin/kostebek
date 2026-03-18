@@ -1,17 +1,25 @@
 # src/tools/reddit_tools.py
 
+import asyncio
 import json
 import os
 import shutil
-import subprocess
 import threading
-import time
 from typing import Any, Dict, List, Optional
 
 from src.tools.contracts import ToolResult
 from src.utils.logger import get_logger
 
 logger = get_logger("reddit_tools")
+
+try:
+    from mcp import ClientSession, StdioServerParameters
+    from mcp.client.stdio import stdio_client
+except ImportError as e:
+    raise RuntimeError(
+        "mcp paketi kurulu değil. Önce şunu çalıştır: pip install mcp"
+    ) from e
+
 
 DEFAULT_KEYWORDS = [
     "wish there was", "app idea", "pain point", "need an app",
@@ -20,293 +28,126 @@ DEFAULT_KEYWORDS = [
     "students need", "teachers wish", "education", "learning"
 ]
 
-_MCP_PROC: Optional[subprocess.Popen] = None
-_MCP_LOCK = threading.RLock()
-_MCP_ID = 0
-_MCP_INITIALIZED = False
-_MCP_STDERR_TAIL: List[str] = []
-_TOOLS_CACHE: Optional[List[Dict[str, Any]]] = None
 
-if os.name == "nt":
-    import msvcrt
-    import _winapi
-
-
-def _next_id() -> int:
-    global _MCP_ID
-    _MCP_ID += 1
-    return _MCP_ID
-
-
-def _spawn_command() -> List[str]:
+def _server_command():
     if os.name == "nt":
         cmd = shutil.which("cmd.exe") or os.path.join(
             os.environ.get("SystemRoot", r"C:\Windows"),
             "System32",
-            "cmd.exe"
+            "cmd.exe",
         )
-        return [cmd, "/d", "/s", "/c", "npx", "-y", "reddit-mcp-buddy"]
+        args = ["/d", "/s", "/c", "npx", "-y", "reddit-mcp-buddy"]
+        return cmd, args
 
     npx = shutil.which("npx")
     if not npx:
-        raise RuntimeError("npx bulunamadı. Node.js / npm kurulu ve PATH içinde olmalı.")
-    return [npx, "-y", "reddit-mcp-buddy"]
+        raise RuntimeError("npx bulunamadı. Node.js/npm PATH içinde olmalı.")
+    return npx, ["-y", "reddit-mcp-buddy"]
 
 
-def _stderr_drain_worker(proc: subprocess.Popen) -> None:
-    global _MCP_STDERR_TAIL
-    if not proc.stderr:
-        return
+def _to_plain(obj: Any) -> Any:
+    if obj is None:
+        return None
 
-    while True:
+    if hasattr(obj, "model_dump"):
         try:
-            line = proc.stderr.readline()
+            return _to_plain(obj.model_dump())
         except Exception:
-            break
+            pass
 
-        if not line:
-            break
+    if isinstance(obj, dict):
+        return {k: _to_plain(v) for k, v in obj.items()}
 
-        if isinstance(line, bytes):
-            text = line.decode("utf-8", "replace").strip()
-        else:
-            text = str(line).strip()
+    if isinstance(obj, (list, tuple)):
+        return [_to_plain(x) for x in obj]
 
-        if text:
-            _MCP_STDERR_TAIL.append(text)
-            if len(_MCP_STDERR_TAIL) > 200:
-                _MCP_STDERR_TAIL = _MCP_STDERR_TAIL[-200:]
-            logger.warning(f"[MCP STDERR] {text}")
-
-
-def _start_mcp_proc() -> subprocess.Popen:
-    global _MCP_PROC, _MCP_INITIALIZED, _TOOLS_CACHE
-
-    if _MCP_PROC is not None and _MCP_PROC.poll() is None:
-        return _MCP_PROC
-
-    cmd = _spawn_command()
-    logger.info(f"[MCP] stdio süreci başlatılıyor: {' '.join(cmd)}")
-
-    _MCP_PROC = subprocess.Popen(
-        cmd,
-        stdin=subprocess.PIPE,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        bufsize=0,
-    )
-
-    threading.Thread(
-        target=_stderr_drain_worker,
-        args=(_MCP_PROC,),
-        daemon=True
-    ).start()
-
-    _MCP_INITIALIZED = False
-    _TOOLS_CACHE = None
-    return _MCP_PROC
-
-
-def _stdout_available(proc: subprocess.Popen) -> int:
-    if not proc.stdout:
-        return 0
-
-    if os.name == "nt":
+    if hasattr(obj, "__dict__"):
         try:
-            handle = msvcrt.get_osfhandle(proc.stdout.fileno())
-            return _winapi.PeekNamedPipe(handle)[0]
+            return _to_plain(vars(obj))
         except Exception:
-            return 0
+            pass
 
-    try:
-        import select
-        r, _, _ = select.select([proc.stdout], [], [], 0)
-        return 1 if r else 0
-    except Exception:
-        return 0
+    return obj
 
 
-def _stdout_read_some(proc: subprocess.Popen, size: int) -> bytes:
-    if not proc.stdout:
-        return b""
+class _MCPBridge:
+    def __init__(self):
+        self._thread: Optional[threading.Thread] = None
+        self._loop: Optional[asyncio.AbstractEventLoop] = None
+        self._session: Optional[ClientSession] = None
+        self._ready = threading.Event()
+        self._start_error: Optional[Exception] = None
+        self._stop_event = None
+        self._lock = threading.RLock()
 
-    if os.name == "nt":
-        handle = msvcrt.get_osfhandle(proc.stdout.fileno())
-        try:
-            return _winapi.ReadFile(handle, max(1, size))[0]
-        except Exception:
-            return b""
+    async def _runner(self):
+        cmd, args = _server_command()
+        logger.info(f"[MCP] stdio süreci başlatılıyor: {cmd} {' '.join(args)}")
 
-    try:
-        return proc.stdout.read(size)
-    except Exception:
-        return b""
-
-
-def _readline_bytes(proc: subprocess.Popen, timeout_sec: float) -> bytes:
-    deadline = time.time() + timeout_sec
-    buf = bytearray()
-
-    while time.time() < deadline:
-        if proc.poll() is not None:
-            tail = " | ".join(_MCP_STDERR_TAIL[-20:])
-            raise RuntimeError(f"MCP süreci kapandı. exit={proc.returncode} stderr={tail}")
-
-        available = _stdout_available(proc)
-        if available <= 0:
-            time.sleep(0.02)
-            continue
-
-        chunk = _stdout_read_some(proc, 1)
-        if not chunk:
-            time.sleep(0.02)
-            continue
-
-        buf.extend(chunk)
-        if chunk == b"\n":
-            return bytes(buf)
-
-    tail = " | ".join(_MCP_STDERR_TAIL[-20:])
-    raise TimeoutError(f"MCP satır okuma zaman aşımı. stderr={tail}")
-
-
-def _read_exact(proc: subprocess.Popen, size: int, timeout_sec: float) -> bytes:
-    deadline = time.time() + timeout_sec
-    buf = bytearray()
-
-    while len(buf) < size and time.time() < deadline:
-        if proc.poll() is not None:
-            tail = " | ".join(_MCP_STDERR_TAIL[-20:])
-            raise RuntimeError(f"MCP süreci kapandı. exit={proc.returncode} stderr={tail}")
-
-        available = _stdout_available(proc)
-        if available <= 0:
-            time.sleep(0.02)
-            continue
-
-        need = min(max(1, available), size - len(buf))
-        chunk = _stdout_read_some(proc, need)
-        if not chunk:
-            time.sleep(0.02)
-            continue
-
-        buf.extend(chunk)
-
-    if len(buf) != size:
-        tail = " | ".join(_MCP_STDERR_TAIL[-20:])
-        raise TimeoutError(
-            f"MCP body zaman aşımı. expected={size} got={len(buf)} stderr={tail}"
+        server_params = StdioServerParameters(
+            command=cmd,
+            args=args,
+            env=os.environ.copy(),
         )
 
-    return bytes(buf)
+        async with stdio_client(server_params) as (read, write):
+            async with ClientSession(read, write) as session:
+                await session.initialize()
+                self._loop = asyncio.get_running_loop()
+                self._session = session
+                self._stop_event = asyncio.Event()
+                logger.info("[MCP] stdio initialize tamam ✅")
+                self._ready.set()
+                await self._stop_event.wait()
+
+    def _thread_main(self):
+        try:
+            asyncio.run(self._runner())
+        except Exception as e:
+            self._start_error = e
+            self._ready.set()
+            logger.error(f"[MCP] bridge hata: {e}")
+        finally:
+            self._session = None
+            self._loop = None
+            self._stop_event = None
+
+    def ensure_started(self):
+        with self._lock:
+            if self._session is not None and self._loop is not None:
+                return
+
+            self._ready = threading.Event()
+            self._start_error = None
+            self._thread = threading.Thread(target=self._thread_main, daemon=True)
+            self._thread.start()
+
+        if not self._ready.wait(timeout=60):
+            raise TimeoutError("MCP başlatma zaman aşımı")
+
+        if self._start_error is not None:
+            raise RuntimeError(f"MCP başlatılamadı: {self._start_error}")
+
+        if self._session is None or self._loop is None:
+            raise RuntimeError("MCP session oluşturulamadı")
+
+    def _run(self, coro, timeout=120):
+        self.ensure_started()
+        future = asyncio.run_coroutine_threadsafe(coro, self._loop)
+        return future.result(timeout=timeout)
+
+    def list_tools(self):
+        return self._run(self._session.list_tools(), timeout=60)
+
+    def call_tool(self, name: str, arguments: Dict[str, Any]):
+        return self._run(
+            self._session.call_tool(name, arguments=arguments),
+            timeout=180
+        )
 
 
-def _mcp_send(proc: subprocess.Popen, payload: Dict[str, Any]) -> None:
-    if not proc.stdin:
-        raise RuntimeError("MCP stdin kullanılamıyor")
-
-    body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
-    header = (
-        f"Content-Length: {len(body)}\r\n"
-        f"Content-Type: application/json\r\n"
-        f"\r\n"
-    ).encode("ascii")
-
-    proc.stdin.write(header + body)
-    proc.stdin.flush()
-
-
-def _mcp_recv(proc: subprocess.Popen, timeout_sec: float = 20.0) -> Dict[str, Any]:
-    headers: Dict[str, str] = {}
-
-    while True:
-        line = _readline_bytes(proc, timeout_sec)
-        if line in (b"\n", b"\r\n"):
-            break
-
-        text = line.decode("ascii", "replace").strip()
-        if ":" in text:
-            k, v = text.split(":", 1)
-            headers[k.strip().lower()] = v.strip()
-
-    content_length = int(headers.get("content-length", "0"))
-    if content_length <= 0:
-        raise RuntimeError(f"Geçersiz MCP header: {headers}")
-
-    body = _read_exact(proc, content_length, timeout_sec)
-
-    try:
-        return json.loads(body.decode("utf-8", "replace"))
-    except Exception as e:
-        raise RuntimeError(f"MCP JSON parse hatası: {e}")
-
-
-def _ensure_initialized() -> subprocess.Popen:
-    global _MCP_INITIALIZED
-
-    proc = _start_mcp_proc()
-    if _MCP_INITIALIZED:
-        return proc
-
-    init_id = _next_id()
-    _mcp_send(proc, {
-        "jsonrpc": "2.0",
-        "id": init_id,
-        "method": "initialize",
-        "params": {
-            "protocolVersion": "2024-11-05",
-            "capabilities": {},
-            "clientInfo": {"name": "kostebek", "version": "1.0"}
-        }
-    })
-
-    while True:
-        msg = _mcp_recv(proc, timeout_sec=30.0)
-
-        if msg.get("method", "").startswith("notifications/"):
-            continue
-
-        if msg.get("id") == init_id:
-            if "error" in msg:
-                raise RuntimeError(f"initialize hatası: {msg['error']}")
-            break
-
-    _mcp_send(proc, {
-        "jsonrpc": "2.0",
-        "method": "notifications/initialized",
-        "params": {}
-    })
-
-    _MCP_INITIALIZED = True
-    logger.info("[MCP] stdio initialize tamam ✅")
-    return proc
-
-
-def _mcp_request(method: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-    with _MCP_LOCK:
-        proc = _ensure_initialized()
-        req_id = _next_id()
-
-        _mcp_send(proc, {
-            "jsonrpc": "2.0",
-            "id": req_id,
-            "method": method,
-            "params": params or {}
-        })
-
-        while True:
-            msg = _mcp_recv(proc, timeout_sec=30.0)
-
-            if msg.get("method", "").startswith("notifications/"):
-                continue
-
-            if msg.get("id") != req_id:
-                continue
-
-            if "error" in msg:
-                raise RuntimeError(f"MCP {method} hatası: {msg['error']}")
-
-            return msg
+_MCP = _MCPBridge()
+_TOOLS_CACHE: Optional[List[Dict[str, Any]]] = None
 
 
 def _get_tools() -> List[Dict[str, Any]]:
@@ -315,18 +156,21 @@ def _get_tools() -> List[Dict[str, Any]]:
     if _TOOLS_CACHE is not None:
         return _TOOLS_CACHE
 
-    res = _mcp_request("tools/list", {})
-    tools = res.get("result", {}).get("tools", []) or []
-    _TOOLS_CACHE = tools
+    resp = _MCP.list_tools()
+    plain = _to_plain(resp)
 
-    names = [t.get("name", "?") for t in tools]
-    logger.info(f"[MCP] Tool'lar: {names}")
+    tools = plain.get("tools", []) if isinstance(plain, dict) else []
+    if not isinstance(tools, list):
+        tools = []
+
+    _TOOLS_CACHE = tools
+    logger.info(f"[MCP] Tool'lar: {[t.get('name') for t in tools if isinstance(t, dict)]}")
     return tools
 
 
 def _get_tool(name: str) -> Optional[Dict[str, Any]]:
     for tool in _get_tools():
-        if tool.get("name") == name:
+        if isinstance(tool, dict) and tool.get("name") == name:
             return tool
     return None
 
@@ -335,7 +179,8 @@ def _tool_properties(tool: Optional[Dict[str, Any]]) -> Dict[str, Any]:
     if not tool:
         return {}
     schema = tool.get("inputSchema") or tool.get("input_schema") or {}
-    return schema.get("properties", {}) or {}
+    props = schema.get("properties", {})
+    return props if isinstance(props, dict) else {}
 
 
 def _pick_key(props: Dict[str, Any], candidates: List[str]) -> Optional[str]:
@@ -365,48 +210,47 @@ def _build_args(tool: Optional[Dict[str, Any]], values: List[tuple]) -> Dict[str
     return args
 
 
-def _tool_call(name: str, arguments: Dict[str, Any]) -> Dict[str, Any]:
+def _tool_call(name: str, arguments: Dict[str, Any]) -> Any:
     logger.info(f"[MCP] tools/call → {name} | args={arguments}")
-    return _mcp_request("tools/call", {
-        "name": name,
-        "arguments": arguments
-    })
+    resp = _MCP.call_tool(name, arguments)
+    return _to_plain(resp)
 
 
-def _try_json(value: Any) -> Any:
-    if isinstance(value, (dict, list)):
-        return value
-    if isinstance(value, str):
+def _try_json(v: Any) -> Any:
+    if isinstance(v, str):
         try:
-            return json.loads(value)
+            return json.loads(v)
         except Exception:
-            return value
-    return value
+            return v
+    return v
 
 
-def _extract_tool_payload(response: Dict[str, Any]) -> Any:
-    result = response.get("result", {}) or {}
+def _extract_tool_payload(response: Any) -> Any:
+    if not isinstance(response, dict):
+        return response
 
-    if "structuredContent" in result and result["structuredContent"] is not None:
-        return result["structuredContent"]
+    if "structuredContent" in response:
+        return response["structuredContent"]
 
-    content = result.get("content", []) or []
-    parsed: List[Any] = []
+    result = response.get("result", response)
 
-    for item in content:
-        if not isinstance(item, dict):
-            continue
+    if isinstance(result, dict):
+        if "structuredContent" in result and result["structuredContent"] is not None:
+            return result["structuredContent"]
 
-        if item.get("type") == "text":
-            parsed.append(_try_json(item.get("text", "")))
-        elif "data" in item:
-            parsed.append(item["data"])
-        else:
-            parsed.append(item)
+        content = result.get("content")
+        if isinstance(content, list):
+            parsed = []
+            for item in content:
+                if isinstance(item, dict) and item.get("type") == "text":
+                    parsed.append(_try_json(item.get("text", "")))
+                else:
+                    parsed.append(item)
+            if len(parsed) == 1:
+                return parsed[0]
+            return parsed
 
-    if len(parsed) == 1:
-        return parsed[0]
-    return parsed
+    return result
 
 
 def _collect_posts(obj: Any) -> List[Dict[str, Any]]:
@@ -444,6 +288,7 @@ def _normalize_post(p: Dict[str, Any], subreddit: str) -> Dict[str, Any]:
         permalink = f"https://reddit.com{permalink}"
 
     final_url = permalink or url or f"https://reddit.com/r/{subreddit}"
+
     comments = p.get("comments", p.get("top_comments", []))
     if not isinstance(comments, list):
         comments = []
@@ -546,8 +391,8 @@ def reddit_search_posts(
             had_errors=False,
             provenance={
                 "subreddit": subreddit,
-                "method": "mcp_stdio",
-                "tool": "browse_subreddit"
+                "method": "mcp_sdk_stdio",
+                "tool": "browse_subreddit",
             }
         )
 
@@ -560,8 +405,8 @@ def reddit_search_posts(
             had_errors=True,
             provenance={
                 "subreddit": subreddit,
-                "method": "mcp_stdio",
-                "error": str(e)
+                "method": "mcp_sdk_stdio",
+                "error": str(e),
             }
         )
 
