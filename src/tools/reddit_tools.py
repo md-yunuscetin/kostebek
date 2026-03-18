@@ -19,11 +19,19 @@ DEFAULT_KEYWORDS = [
 ]
 
 
-def _mcp_call_sync(tool_name: str, arguments: dict) -> dict:
-    """Synchronous MCP çağrısı — asyncio gerektirmez."""
+# ─── MCP HEADERS (406 fix) ───────────────────────────────────────────────────
+_MCP_HEADERS = {
+    "Content-Type": "application/json",
+    "Accept": "application/json, text/event-stream",
+}
+
+
+def _mcp_call_sync(method: str, params: dict) -> dict:
+    """Tek httpx.Client ile tam MCP oturumu açar ve method'u çalıştırır."""
     with httpx.Client(timeout=30) as client:
-        # 1. Initialize
-        init_res = client.post(MCP_URL, json={
+
+        # 1) Initialize
+        init = client.post(MCP_URL, json={
             "jsonrpc": "2.0", "id": 1,
             "method": "initialize",
             "params": {
@@ -31,23 +39,28 @@ def _mcp_call_sync(tool_name: str, arguments: dict) -> dict:
                 "capabilities": {},
                 "clientInfo": {"name": "kostebek", "version": "1.0"}
             }
-        })
-        session_id = init_res.headers.get("mcp-session-id", "")
-        headers = {"mcp-session-id": session_id} if session_id else {}
+        }, headers=_MCP_HEADERS)
 
-        # 2. Initialized bildirimi
+        # Session-id varsa sonraki isteklere ekle
+        sid = init.headers.get("mcp-session-id", "")
+        hdrs = {**_MCP_HEADERS, **({"mcp-session-id": sid} if sid else {})}
+
+        # 2) Initialized bildirimi (fire-and-forget)
         client.post(MCP_URL, json={
             "jsonrpc": "2.0",
             "method": "notifications/initialized",
             "params": {}
-        }, headers=headers)
+        }, headers=hdrs)
 
-        # 3. Tool çağrısı
+        # 3) Asıl çağrı
         res = client.post(MCP_URL, json={
             "jsonrpc": "2.0", "id": 2,
-            "method": "tools/call",
-            "params": {"name": tool_name, "arguments": arguments}
-        }, headers=headers)
+            "method": method,
+            "params": params
+        }, headers=hdrs)
+
+        if res.status_code != 200:
+            raise RuntimeError(f"HTTP {res.status_code}: {res.text[:200]}")
 
         return res.json()
 
