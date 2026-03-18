@@ -99,8 +99,9 @@ def reddit_search_posts(
 
     # MCP tool listesini al (ilk çağrıda hangi tool ismi kullanıldığını öğren)
     try:
-        tools_res = _mcp_call_sync("tools/list", {})
-        available = [t["name"] for t in tools_res.get("result", {}).get("tools", [])]
+        tools_res = _mcp_call_sync("tools/list", {})          # ← method olarak
+        available = [t["name"] for t in
+                     tools_res.get("result", {}).get("tools", [])]
         logger.info(f"[MCP] Mevcut tool'lar: {available}")
     except Exception as e:
         logger.error(f"[MCP] Tool listesi alınamadı: {e}")
