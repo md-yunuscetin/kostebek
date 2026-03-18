@@ -1,11 +1,16 @@
 import os
 import hashlib
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List
 
 import chromadb
-from chromadb.utils import embedding_functions
 from dotenv import load_dotenv
+from google import genai
+
+try:
+    from chromadb import Documents, EmbeddingFunction, Embeddings
+except Exception:
+    from chromadb.api.types import Documents, EmbeddingFunction, Embeddings
 
 from src.models import IdeaDraft
 from src.utils.logger import get_logger
@@ -17,33 +22,32 @@ load_dotenv()
 api_key = os.getenv("GEMINI_API_KEY")
 
 
-def _build_gemini_embedding_function(api_key: str):
-    """
-    Chroma sürümüne göre uygun Gemini embedding wrapper'ını seçer.
-    Yeni sürüm: GoogleGeminiEmbeddingFunction
-    Eski sürüm fallback: GoogleGenerativeAiEmbeddingFunction
-    """
-    if hasattr(embedding_functions, "GoogleGeminiEmbeddingFunction"):
-        logger.info("[VECTOR DB] GoogleGeminiEmbeddingFunction kullanılıyor.")
-        return embedding_functions.GoogleGeminiEmbeddingFunction(
-            api_key=api_key,
-            model_name="gemini-embedding-001",
-            task_type="RETRIEVAL_DOCUMENT",
+class GeminiGenAIEmbeddingFunction(EmbeddingFunction[Documents]):
+    def __init__(self, api_key: str, model_name: str = "gemini-embedding-001"):
+        if not api_key:
+            raise ValueError("GEMINI_API_KEY tanımlı değil")
+        self.api_key = api_key
+        self.model_name = model_name
+        self.client = genai.Client(api_key=api_key)
+
+    def __call__(self, input: Documents) -> Embeddings:
+        texts = [str(x) if x is not None else "" for x in input]
+        if not texts:
+            return []
+
+        response = self.client.models.embed_content(
+            model=self.model_name,
+            contents=texts,
         )
 
-    if hasattr(embedding_functions, "GoogleGenerativeAiEmbeddingFunction"):
-        logger.warning(
-            "[VECTOR DB] Eski Chroma wrapper'ı kullanılıyor: GoogleGenerativeAiEmbeddingFunction"
-        )
-        return embedding_functions.GoogleGenerativeAiEmbeddingFunction(
-            api_key=api_key,
-            model_name="models/gemini-embedding-001",
-            task_type="RETRIEVAL_DOCUMENT",
-        )
+        vectors: List[List[float]] = []
+        for emb in response.embeddings:
+            values = getattr(emb, "values", None)
+            if values is None and isinstance(emb, dict):
+                values = emb.get("values", [])
+            vectors.append([float(v) for v in values])
 
-    raise RuntimeError(
-        "Uygun Gemini embedding function bulunamadı. Chroma sürümünü güncelle."
-    )
+        return vectors
 
 
 class VectorStoreManager:
@@ -66,7 +70,17 @@ class VectorStoreManager:
                 )
                 return
 
-            self.embedding_function = _build_gemini_embedding_function(api_key)
+            self.embedding_function = GeminiGenAIEmbeddingFunction(
+                api_key=api_key,
+                model_name="gemini-embedding-001",
+            )
+
+            logger.info(
+                f"[VECTOR DB DEBUG] embedding_function_class={type(self.embedding_function).__name__}"
+            )
+            logger.info(
+                f"[VECTOR DB DEBUG] embedding_model={self.embedding_function.model_name}"
+            )
 
             self.collection = self.client.get_or_create_collection(
                 name="business_ideas",
@@ -84,7 +98,6 @@ class VectorStoreManager:
             self.embedding_function = None
 
     def save_idea(self, idea: IdeaDraft, final_score: int) -> bool:
-        """Onaylanan fikri ChromaDB'ye vektörel olarak kaydeder."""
         if not self.client or not self.collection:
             return False
 
@@ -143,10 +156,6 @@ class VectorStoreManager:
         threshold: float = None,
         limit: int = 3
     ) -> bool:
-        """
-        Geçmişte benzer fikir var mı kontrol eder.
-        True dönerse muhtemel kopya/çok benzer kabul edilir.
-        """
         if threshold is None:
             threshold = config.get("guard", {}).get("similarity_threshold", 0.97)
 
@@ -166,8 +175,6 @@ class VectorStoreManager:
             if not distances:
                 return False
 
-            is_duplicate = False
-
             for dist in distances:
                 try:
                     dist = float(dist)
@@ -177,13 +184,12 @@ class VectorStoreManager:
                 similarity_score = 1 - (dist / 2.0) if dist <= 2.0 else 0.0
 
                 if similarity_score >= threshold:
-                    is_duplicate = True
                     logger.warning(
                         f"[VECTOR DB] Kopya Fikir Tespit Edildi! (Benzerlik Skoru: {similarity_score:.2f})"
                     )
-                    break
+                    return True
 
-            return is_duplicate
+            return False
 
         except Exception as e:
             logger.error(f"[VECTOR DB] Benzerlik sorgulama hatası: {str(e)}")
