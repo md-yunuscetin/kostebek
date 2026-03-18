@@ -131,17 +131,22 @@ class _MCPBridge:
         if self._session is None or self._loop is None:
             raise RuntimeError("MCP session oluşturulamadı")
 
-    def _run(self, coro, timeout=120):
+    def _run(self, coro_factory, timeout=120):
         self.ensure_started()
-        future = asyncio.run_coroutine_threadsafe(coro, self._loop)
+        if self._session is None or self._loop is None:
+            raise RuntimeError("MCP session hazır değil")
+        future = asyncio.run_coroutine_threadsafe(
+            coro_factory(self._session),
+            self._loop
+        )
         return future.result(timeout=timeout)
 
     def list_tools(self):
-        return self._run(self._session.list_tools(), timeout=60)
+        return self._run(lambda session: session.list_tools(), timeout=60)
 
     def call_tool(self, name: str, arguments: Dict[str, Any]):
         return self._run(
-            self._session.call_tool(name, arguments=arguments),
+            lambda session: session.call_tool(name, arguments=arguments),
             timeout=180
         )
 
